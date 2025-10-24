@@ -1,0 +1,76 @@
+[
+  {
+    "name": "theme_info",
+    "theme_name": "PokePage",
+    "theme_version": "1.0.0",
+    "theme_author": "Ahmed Alami",
+    "theme_documentation_url": "https://github.com/A71as/RecordCrate",
+    "theme_support_url": "https://github.com/A71as/RecordCrate/issues"
+  },
+  {
+    "name": "PokePage",
+    "settings": [
+      {
+        "type": "header",
+        "content": "Brand Identity"
+      },
+      {
+        "type": "checkbox",
+        "id": "show_everyday_ai_nav",
+        "label": "Show PokePage navigation",
+        "default": true
+      },
+      {
+        "type": "image_picker",
+        "id": "logo",
+        "label": "Logo"
+      },
+      {
+        "type": "text",
+        "id": "site_title",
+        "label": "Site Title",
+        "default": "PokePage"
+      },
+      {
+        "type": "text",
+        "id": "site_subtitle",
+        "label": "Site Subtitle",
+        "default": "WITH AHMED ALAMI"
+      },
+      {
+        "type": "textarea",
+        "id": "site_tagline",
+        "label": "Site Tagline",
+        "default": "Free Monthly Town Hall • Newark, NJ & Online"
+      },
+      {
+        "type": "header",
+        "content": "Colors - PokePage Palette"
+      },
+      {
+        "type": "color",
+        "id": "brand_primary",
+        "label": "Primary (Forest Teal)",
+        "default": "#1d4035"
+      },
+      {
+        "type": "color",
+        "id": "brand_accent",
+        "label": "Accent (Burnt Sienna)",
+        "default": "#b85a1f"
+      },
+      {
+        "type": "color",
+        "id": "brand_warm_white",
+        "label": "Background (Warm White)",
+        "default": "#fefdfb"
+      },
+      {
+        "type": "color",
+        "id": "brand_cream",
+        "label": "Section Background (Cream)",
+        "default": "#f7f5f0"
+      }
+    ]
+  }
+]

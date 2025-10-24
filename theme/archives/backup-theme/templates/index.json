@@ -17,25 +17,25 @@
         "credential_1": {
           "type": "credential",
           "settings": {
-            "icon": "fas fa-university",
-            "title": "NJIT Professor",
-            "description": "Information Systems & Computer Science"
+            "icon": "fas fa-shield-alt",
+            "title": "Trusted Seller",
+            "description": "Secure listings, careful grading, and insured shipping for buyers and traders."
           }
         },
         "credential_2": {
           "type": "credential",
           "settings": {
-            "icon": "fas fa-briefcase",
-            "title": "40+ Years",
-            "description": "Technology Leadership Experience"
+            "icon": "fas fa-book-open",
+            "title": "Curated Binder Collections",
+            "description": "Binder-style sets organized by rarity and condition — great for collectors who want ready-to-browse pages."
           }
         },
         "credential_3": {
           "type": "credential",
           "settings": {
-            "icon": "fas fa-robot",
-            "title": "AI Expert",
-            "description": "Practical AI Implementation & Strategy"
+            "icon": "fas fa-shipping-fast",
+            "title": "Fast Shipping & Trades",
+            "description": "Reliable domestic shipping and responsive trade support to make buying and swapping easy."
           }
         }
       },

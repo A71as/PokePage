@@ -1,0 +1,53 @@
+<section class="newsletter-signup">
+  <div class="container">
+    <div class="newsletter-inner">
+      <h2 class="newsletter-title">{{ section.settings.title }}</h2>
+      <p class="newsletter-subtitle">{{ section.settings.subtitle }}</p>
+
+      <form id="newsletter-form-{{ section.id }}" class="newsletter-form" method="post" action="{{ section.settings.endpoint_url }}">
+        <input type="email" name="email" placeholder="{{ section.settings.placeholder }}" required class="newsletter-input" />
+        <button type="submit" class="btn-primary">{{ section.settings.button_text }}</button>
+      </form>
+
+      {% if section.settings.note != blank %}
+        <p class="newsletter-note">{{ section.settings.note }}</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Newsletter Signup",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Title", "default": "Join our newsletter" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Get updates and special offers" },
+    { "type": "text", "id": "placeholder", "label": "Email placeholder", "default": "you@example.com" },
+    { "type": "text", "id": "button_text", "label": "Button text", "default": "Subscribe" },
+    { "type": "textarea", "id": "note", "label": "Small note below form", "default": "We respect your privacy." },
+    { "type": "url", "id": "endpoint_url", "label": "Signup endpoint (POST) - optional" }
+  ],
+  "presets": [ { "name": "Newsletter Signup" } ]
+}
+{% endschema %}
+
+<script>
+  (function(){
+    var form = document.getElementById('newsletter-form-{{ section.id }}');
+    if(!form) return;
+
+    // If no endpoint is configured, prevent submit and show a console message for admin
+    if(!form.getAttribute('action')){
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        alert('No signup endpoint configured. Set "endpoint_url" in the section settings.');
+      });
+      return;
+    }
+
+    form.addEventListener('submit', function(e){
+      // allow normal POST if an endpoint was set — this keeps things simple
+      // Optionally you can send via fetch for AJAX signup
+    });
+  })();
+</script>
