@@ -1,0 +1,66 @@
+/* ============================================
+   EVERYDAY AI - SHOPIFY THEME BRANDING
+   Design System: Modern, Professional, Trust-Building
+   ============================================ */
+
+:root {
+    /* Dynamic colors from theme settings */
+    --primary: {{ settings.brand_primary | default: '#1d4035' }};
+    --accent: {{ settings.brand_accent | default: '#b85a1f' }};
+    --background: {{ settings.brand_warm_white | default: '#fefdfb' }};
+    --surface: {{ settings.brand_cream | default: '#f7f5f0' }};
+    
+    /* Typography */
+    --font-heading: 'Helvetica Neue', Arial, sans-serif;
+    --font-body: 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Button System */
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Base surface and typography */
+.site-wrapper {
+    background: var(--background);
+    color: #1b1b1b;
+    font-family: var(--font-body);
+}
+
+.header, .site-footer {
+    background: var(--surface);
+}
+
+/* Utility tokens (examples) */
+.spacing-xs { padding: 4px; }
+.spacing-sm { padding: 8px; }
+.spacing-md { padding: 16px; }
+.spacing-lg { padding: 24px; }
+
+/* Card component example */
+.card {
+    background: var(--surface);
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(29, 64, 53, 0.06);
+    padding: 16px;
+}
+
+/* Accessibility focus state */
+:focus {
+    outline: 3px solid rgba(29,64,53,0.12);
+    outline-offset: 2px;
+}
+
+/* Placeholder for the rest of the system - expand with tokens for spacing, radii, elevation */
+/* [Add complete CSS system...] */

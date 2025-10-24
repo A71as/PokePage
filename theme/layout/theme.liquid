@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ shop.locale }}">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
+    {%- comment -%} Shopify required header placeholder {%- endcomment -%}
+    {{ content_for_header }}
+
+  {%- comment -%} Brand stylesheet (Everyday AI) and icons - inserted before closing </head> {%- endcomment -%}
+  <link rel="stylesheet" href="{{ 'everyday-ai-branding.css' | asset_url }}" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-+y0P1nYh3s4qjZl7KkK1vXJzvZb1q6QmQe9u6V9sF1yVq3R8Yw0K1o1K1uQ2Z3a4b5c6d7e8f9g0h=" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  </head>
+  <body class="site-wrapper">
+    {{ content_for_layout }}
+  </body>
+</html>

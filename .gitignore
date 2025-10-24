@@ -1,0 +1,23 @@
+# Shopify / theme files
+config.yml
+.env
+*.log
+.DS_Store
+node_modules/
+*.zip
+
+# OS files
+Thumbs.db
+ehthumbs.db
+
+# IDE/editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Build artifacts
+dist/
+build/

@@ -1,0 +1,113 @@
+{% comment %}
+binder-page.liquid
+Renders layout selector and a small visual preview of the binder page.
+Inputs:
+- product: the product object
+- layout_index: index (0-based) of the 'Layout' option in product.options
+
+Behavior:
+- Renders option selector for Layout (values 9 and 16 expected).
+- Shows price for currently selected variant.
+- Shows a preview grid (3x3 for 9, 4x4 for 16) using product images when available.
+{% endcomment %}
+
+{% assign layout_option = nil %}
+{% if layout_index != nil %}
+  {% assign layout_option = product.options_with_values | index: layout_index %}
+{% endif %}
+
+<div class="binder-widget" data-product-id="{{ product.id }}">
+  <form method="post" action="/cart/add" id="add-to-cart-form-{{ product.id }}">
+    <div class="option-row">
+      <label for="layout-select-{{ product.id }}">Layout</label>
+      <select id="layout-select-{{ product.id }}" name="options[{{ layout_option.name | escape }}]">
+        {% for val in product.options_with_values[layout_index].values %}
+          <option value="{{ val }}">{{ val }} cards</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="price-row">
+      {% comment %} Show price of first variant as default; JS updates price when variant changes. {% endcomment %}
+      <div class="price" id="product-price-{{ product.id }}">{{ product.price | money }}</div>
+    </div>
+
+    <div class="preview-row">
+      <div class="binder-preview" id="binder-preview-{{ product.id }}">
+        {% comment %} Default to 9 slots if none matched. {% endcomment %}
+        <div class="binder-grid layout-9">
+          {% assign total_slots = 9 %}
+          {% for i in (1..total_slots) %}
+            <div class="slot"> 
+              {% if product.images.size >= i %}
+                <img src="{{ product.images[i-1] | img_url: '200x200' }}" alt="slot {{ i }}">
+              {% else %}
+                <div class="slot-placeholder">+</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <input type="hidden" name="id" id="variant-id-{{ product.id }}" value="{{ product.variants.first.id }}">
+
+    <div class="actions">
+      <button type="submit" class="btn add-to-cart">Add to cart</button>
+    </div>
+  </form>
+</div>
+
+{% comment %} Minimal JS-powered variant switcher (works without bundling). {% endcomment %}
+<script>
+(function(){
+  var product = {{ product | json }};
+  var form = document.getElementById('add-to-cart-form-{{ product.id }}');
+  var layoutSelect = document.getElementById('layout-select-{{ product.id }}');
+  var priceEl = document.getElementById('product-price-{{ product.id }}');
+  var variantInput = document.getElementById('variant-id-{{ product.id }}');
+  var preview = document.getElementById('binder-preview-{{ product.id }}');
+
+  function money(cents){
+    // crude formatting — themes usually provide helpers. Replace if needed.
+    return (cents/100).toFixed(2);
+  }
+
+  function updateForLayout(layoutValue){
+    var slots = (String(layoutValue).trim() === '16') ? 16 : 9;
+    // update preview class
+    var grid = preview.querySelector('.binder-grid');
+    grid.className = 'binder-grid layout-' + slots;
+
+    // rebuild slots visually if product images exist
+    var html = '';
+    for(var i=0;i<slots;i++){
+      html += '<div class="slot">';
+      if(product.images[i]){
+        html += '<img src="' + product.images[i].src.replace(/\.jpg|\.png|\.jpeg|\.gif/,'') + '" alt="slot '+(i+1)+'">';
+      } else {
+        html += '<div class="slot-placeholder">+</div>';
+      }
+      html += '</div>';
+    }
+    grid.innerHTML = html;
+
+    // choose variant matching layout option (by option value)
+    var selectedVariant = product.variants.find(function(v){
+      return v.options.includes(String(layoutValue));
+    }) || product.variants[0];
+
+    if(selectedVariant){
+      variantInput.value = selectedVariant.id;
+      // update price text if present
+      if(priceEl) priceEl.textContent = (selectedVariant.price/100).toFixed(2);
+    }
+  }
+
+  if(layoutSelect){
+    layoutSelect.addEventListener('change', function(e){ updateForLayout(e.target.value); });
+    // initialize
+    updateForLayout(layoutSelect.value || '9');
+  }
+})();
+</script>
