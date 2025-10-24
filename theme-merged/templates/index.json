@@ -1,0 +1,61 @@
+{
+  "sections": {
+    "pokepage-hero": {
+      "type": "pokepage-hero",
+      "settings": {
+        "title": "PokePage",
+        "subtitle": "WITH AHMED ALAMI",
+        "description": "Free Monthly Town Hall • Newark, NJ & Online",
+        "show_cta": true,
+        "cta_text": "Join Our Community",
+        "cta_link": "#newsletter-signup"
+      }
+    },
+    "about-ahmed": {
+      "type": "about-ahmed",
+      "blocks": {
+        "credential_1": {
+          "type": "credential",
+          "settings": {
+            "icon": "fas fa-shield-alt",
+            "title": "Trusted Seller",
+            "description": "Secure listings, careful grading, and insured shipping for buyers and traders."
+          }
+        },
+        "credential_2": {
+          "type": "credential",
+          "settings": {
+            "icon": "fas fa-book-open",
+            "title": "Curated Binder Collections",
+            "description": "Binder-style sets organized by rarity and condition — great for collectors who want ready-to-browse pages."
+          }
+        },
+        "credential_3": {
+          "type": "credential",
+          "settings": {
+            "icon": "fas fa-shipping-fast",
+            "title": "Fast Shipping & Trades",
+            "description": "Reliable domestic shipping and responsive trade support to make buying and swapping easy."
+          }
+        }
+      },
+      "block_order": [
+        "credential_1",
+        "credential_2",
+        "credential_3"
+      ]
+    },
+    "town-hall-info": {
+      "type": "town-hall-info"
+    },
+    "newsletter-signup": {
+      "type": "newsletter-signup"
+    }
+  },
+  "order": [
+    "pokepage-hero",
+    "about-ahmed",
+    "town-hall-info",
+    "newsletter-signup"
+  ]
+}

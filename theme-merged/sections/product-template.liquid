@@ -1,0 +1,41 @@
+{% comment %}
+Product template section for binder-page products.
+- Expects an option named "Layout" with values "9" and "16" (string values).
+- Renders the binder-page snippet which handles selection and preview.
+{% endcomment %}
+
+<section class="product-section">
+  <div class="product-main">
+    <div class="product-gallery">
+      {% if product.images.size > 0 %}
+        <img src="{{ product.featured_image | img_url: '800x' }}" alt="{{ product.title }}" />
+      {% else %}
+        <div class="image-placeholder">No image</div>
+      {% endif %}
+    </div>
+
+    <div class="product-info">
+      <h1>{{ product.title }}</h1>
+      <div class="product-vendor">{{ product.vendor }}</div>
+
+      {% if product.options.size > 0 %}
+        {% assign layout_index = 0 %}
+        {% for option in product.options_with_values %}
+          {% if option.name == 'Layout' %}
+            {% assign layout_index = forloop.index0 %}
+          {% endif %}
+        {% endfor %}
+
+        {% render 'binder-page', product: product, layout_index: layout_index %}
+      {% else %}
+        <p>This product has no layout option. Add an option named "Layout" with values 9 and 16.</p>
+        <form method="post" action="/cart/add">
+          <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+          <button type="submit">Add to cart</button>
+        </form>
+      {% endif %}
+
+      <div class="product-description">{{ product.description }}</div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,63 @@
+<section class="town-hall-info">
+  <div class="container">
+    <div class="town-hall-inner">
+      <h2 class="town-title">{{ section.settings.title }}</h2>
+      <p class="town-subtitle">{{ section.settings.subtitle }}</p>
+
+      <div class="town-details">
+        <div class="town-item">
+          <strong>Date</strong>
+          <div>{{ section.settings.date }}</div>
+        </div>
+        <div class="town-item">
+          <strong>Time</strong>
+          <div>{{ section.settings.time }}</div>
+        </div>
+        <div class="town-item">
+          <strong>Location</strong>
+          <div>
+            {% if section.settings.location_link and section.settings.location_link != "" %}
+              <a href="{{ section.settings.location_link }}" target="_blank">{{ section.settings.location }}</a>
+            {% else %}
+              {{ section.settings.location }}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {% if section.settings.show_online and section.settings.online_link != blank %}
+        <p class="town-online">Also streaming online: <a href="{{ section.settings.online_link }}" target="_blank">Join live</a></p>
+      {% endif %}
+
+      {% if section.settings.registration_link != blank %}
+        <div class="town-actions">
+          <a class="btn-primary" href="{{ section.settings.registration_link }}">{{ section.settings.registration_text }}</a>
+        </div>
+      {% endif %}
+
+      {% if section.settings.description != blank %}
+        <div class="town-description">{{ section.settings.description }}</div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Town Hall Info",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Title", "default": "Monthly Town Hall" },
+    { "type": "text", "id": "subtitle", "label": "Subtitle", "default": "Join us for updates and Q&A" },
+    { "type": "text", "id": "date", "label": "Date", "default": "First Tuesday of the month" },
+    { "type": "text", "id": "time", "label": "Time", "default": "7:00 PM EST" },
+    { "type": "text", "id": "location", "label": "Location Name", "default": "Newark Town Hall" },
+    { "type": "url", "id": "location_link", "label": "Location map/link (optional)" },
+    { "type": "checkbox", "id": "show_online", "label": "Show online stream link", "default": true },
+    { "type": "url", "id": "online_link", "label": "Online stream link (Zoom/YouTube)" },
+    { "type": "url", "id": "registration_link", "label": "Registration link (optional)" },
+    { "type": "text", "id": "registration_text", "label": "Registration button text", "default": "Register" },
+    { "type": "textarea", "id": "description", "label": "Description (optional)" }
+  ],
+  "presets": [ { "name": "Town Hall Info" } ]
+}
+{% endschema %}
