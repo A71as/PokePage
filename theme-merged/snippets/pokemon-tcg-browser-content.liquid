@@ -1,0 +1,486 @@
+<!-- Pokemon TCG Browser Content Snippet -->
+<div class="pokemon-tcg-browser">
+  <div class="browser-header">
+    <h3>Browse Pokemon Cards</h3>
+    <button class="close-browser" onclick="document.getElementById('pokemonBrowser').classList.remove('active')">×</button>
+  </div>
+  
+  <div class="browser-search">
+    <input type="text" id="cardSearch" placeholder="Search cards..." class="search-input">
+  </div>
+  
+  <div class="browser-tabs">
+    <button class="tab-btn active" data-tab="eras">Eras</button>
+    <button class="tab-btn" data-tab="sets">Sets</button>
+    <button class="tab-btn" data-tab="cards">Cards</button>
+  </div>
+  
+  <div class="browser-content">
+    <div id="erasTab" class="tab-content active">
+      <div class="eras-grid">
+        <div class="era-item" data-era="vintage">
+          <h4>Vintage (1998-1999)</h4>
+          <p>Original Base Set era</p>
+        </div>
+        <div class="era-item" data-era="neo">
+          <h4>Neo Series (2000-2001)</h4>
+          <p>Neo Genesis, Discovery, Destiny</p>
+        </div>
+        <div class="era-item" data-era="ecard">
+          <h4>e-Card Series (2002-2003)</h4>
+          <p>Digital integration era</p>
+        </div>
+        <div class="era-item" data-era="ex">
+          <h4>EX Series (2003-2007)</h4>
+          <p>Pokemon-ex introduction</p>
+        </div>
+        <div class="era-item" data-era="dp">
+          <h4>Diamond & Pearl (2007-2009)</h4>
+          <p>Sinnoh region cards</p>
+        </div>
+        <div class="era-item" data-era="hgss">
+          <h4>HeartGold SoulSilver (2009-2011)</h4>
+          <p>Johto region return</p>
+        </div>
+        <div class="era-item" data-era="bw">
+          <h4>Black & White (2011-2013)</h4>
+          <p>Unova region cards</p>
+        </div>
+        <div class="era-item" data-era="xy">
+          <h4>XY Series (2014-2016)</h4>
+          <p>Kalos region and Mega Evolution</p>
+        </div>
+        <div class="era-item" data-era="sm">
+          <h4>Sun & Moon (2017-2019)</h4>
+          <p>Alola region and GX cards</p>
+        </div>
+        <div class="era-item" data-era="swsh">
+          <h4>Sword & Shield (2020-2022)</h4>
+          <p>Galar region and V cards</p>
+        </div>
+        <div class="era-item" data-era="sv">
+          <h4>Scarlet & Violet (2023+)</h4>
+          <p>Paldea region and current sets</p>
+        </div>
+      </div>
+    </div>
+    
+    <div id="setsTab" class="tab-content">
+      <div class="sets-loading">
+        <p>Select an era to view sets</p>
+      </div>
+      <div class="sets-grid" style="display: none;"></div>
+    </div>
+    
+    <div id="cardsTab" class="tab-content">
+      <div class="cards-loading">
+        <p>Select a set to view cards</p>
+      </div>
+      <div class="cards-grid" style="display: none;"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.pokemon-tcg-browser {
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.browser-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e1e5e9;
+  margin-bottom: 1rem;
+}
+
+.browser-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-foreground);
+}
+
+.close-browser {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.close-browser:hover {
+  color: #374151;
+}
+
+.browser-search {
+  margin-bottom: 1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.browser-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid #e1e5e9;
+  background: white;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.browser-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+.eras-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.era-item {
+  padding: 1rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.era-item:hover {
+  border-color: #3b82f6;
+  background: #f0f9ff;
+}
+
+.era-item h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  color: var(--color-foreground);
+}
+
+.era-item p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.sets-grid,
+.cards-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.set-item,
+.card-item {
+  padding: 0.75rem;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.set-item:hover,
+.card-item:hover {
+  border-color: #10b981;
+  background: #f0fdf4;
+}
+
+.card-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-item img {
+  width: 80px;
+  height: auto;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.card-item h5 {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sets-loading,
+.cards-loading {
+  text-align: center;
+  padding: 2rem;
+  color: #6b7280;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+(function() {
+  const API_KEY = '27cc9548-6ecd-4502-8b2d-267e2ef1bb61';
+  const API_BASE = 'https://api.pokemontcg.io/v2';
+  
+  let currentEra = null;
+  let currentSet = null;
+  
+  // Era mappings to API queries
+  const eraQueries = {
+    vintage: 'set.series:"Base"',
+    neo: 'set.series:"Neo"',
+    ecard: 'set.series:"E-Card"',
+    ex: 'set.series:"EX"',
+    dp: 'set.series:"Diamond & Pearl"',
+    hgss: 'set.series:"HeartGold & SoulSilver"',
+    bw: 'set.series:"Black & White"',
+    xy: 'set.series:"XY"',
+    sm: 'set.series:"Sun & Moon"',
+    swsh: 'set.series:"Sword & Shield"',
+    sv: 'set.series:"Scarlet & Violet"'
+  };
+  
+  // Initialize browser functionality
+  function initBrowser() {
+    // Tab switching
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const tabName = e.target.dataset.tab;
+        switchTab(tabName);
+      });
+    });
+    
+    // Era selection
+    document.querySelectorAll('.era-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const era = e.currentTarget.dataset.era;
+        selectEra(era);
+      });
+    });
+    
+    // Search functionality
+    document.getElementById('cardSearch').addEventListener('input', debounce(handleSearch, 300));
+  }
+  
+  function switchTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.toggle('active', content.id === tabName + 'Tab');
+    });
+  }
+  
+  async function selectEra(era) {
+    currentEra = era;
+    switchTab('sets');
+    
+    const setsGrid = document.querySelector('.sets-grid');
+    const setsLoading = document.querySelector('.sets-loading');
+    
+    setsLoading.innerHTML = '<div class="loading-spinner"></div>Loading sets...';
+    setsLoading.style.display = 'block';
+    setsGrid.style.display = 'none';
+    
+    try {
+      const query = eraQueries[era];
+      const response = await fetch(`${API_BASE}/sets?q=${encodeURIComponent(query)}`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      const data = await response.json();
+      displaySets(data.data || []);
+    } catch (error) {
+      console.error('Error fetching sets:', error);
+      setsLoading.innerHTML = 'Error loading sets. Please try again.';
+    }
+  }
+  
+  function displaySets(sets) {
+    const setsGrid = document.querySelector('.sets-grid');
+    const setsLoading = document.querySelector('.sets-loading');
+    
+    if (sets.length === 0) {
+      setsLoading.innerHTML = 'No sets found for this era.';
+      return;
+    }
+    
+    setsGrid.innerHTML = sets.map(set => `
+      <div class="set-item" data-set-id="${set.id}">
+        <img src="${set.images?.logo || set.images?.symbol}" alt="${set.name}" style="width: 40px; height: 40px; margin-bottom: 0.5rem;">
+        <h4>${set.name}</h4>
+        <p>${set.releaseDate || 'Unknown date'}</p>
+        <small>${set.total || 0} cards</small>
+      </div>
+    `).join('');
+    
+    setsLoading.style.display = 'none';
+    setsGrid.style.display = 'grid';
+    
+    // Add click listeners to sets
+    document.querySelectorAll('.set-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const setId = e.currentTarget.dataset.setId;
+        selectSet(setId);
+      });
+    });
+  }
+  
+  async function selectSet(setId) {
+    currentSet = setId;
+    switchTab('cards');
+    
+    const cardsGrid = document.querySelector('.cards-grid');
+    const cardsLoading = document.querySelector('.cards-loading');
+    
+    cardsLoading.innerHTML = '<div class="loading-spinner"></div>Loading cards...';
+    cardsLoading.style.display = 'block';
+    cardsGrid.style.display = 'none';
+    
+    try {
+      const response = await fetch(`${API_BASE}/cards?q=set.id:${setId}&pageSize=50`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      const data = await response.json();
+      displayCards(data.data || []);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      cardsLoading.innerHTML = 'Error loading cards. Please try again.';
+    }
+  }
+  
+  function displayCards(cards) {
+    const cardsGrid = document.querySelector('.cards-grid');
+    const cardsLoading = document.querySelector('.cards-loading');
+    
+    if (cards.length === 0) {
+      cardsLoading.innerHTML = 'No cards found in this set.';
+      return;
+    }
+    
+    cardsGrid.innerHTML = cards.map(card => `
+      <div class="card-item" data-card-data='${JSON.stringify(card)}'>
+        <img src="${card.images?.small}" alt="${card.name}" loading="lazy">
+        <h5>${card.name}</h5>
+        <small>${card.number}/${card.set.total}</small>
+      </div>
+    `).join('');
+    
+    cardsLoading.style.display = 'none';
+    cardsGrid.style.display = 'grid';
+    
+    // Add click listeners to cards
+    document.querySelectorAll('.card-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const cardData = JSON.parse(e.currentTarget.dataset.cardData);
+        selectCard(cardData);
+      });
+    });
+  }
+  
+  function selectCard(cardData) {
+    // Dispatch custom event for the page builder to catch
+    const event = new CustomEvent('pokemonCardSelected', {
+      detail: cardData
+    });
+    document.dispatchEvent(event);
+  }
+  
+  async function handleSearch(query) {
+    if (!query.trim()) return;
+    
+    switchTab('cards');
+    
+    const cardsGrid = document.querySelector('.cards-grid');
+    const cardsLoading = document.querySelector('.cards-loading');
+    
+    cardsLoading.innerHTML = '<div class="loading-spinner"></div>Searching cards...';
+    cardsLoading.style.display = 'block';
+    cardsGrid.style.display = 'none';
+    
+    try {
+      const response = await fetch(`${API_BASE}/cards?q=name:${encodeURIComponent(query)}*&pageSize=20`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      const data = await response.json();
+      displayCards(data.data || []);
+    } catch (error) {
+      console.error('Error searching cards:', error);
+      cardsLoading.innerHTML = 'Error searching cards. Please try again.';
+    }
+  }
+  
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+  
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initBrowser);
+  } else {
+    initBrowser();
+  }
+})();
+</script>

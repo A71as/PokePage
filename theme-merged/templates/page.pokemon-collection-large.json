@@ -3,12 +3,15 @@
     "main": {
       "type": "main-page"
     },
+    "pokemon-tcg-browser": {
+      "type": "pokemon-tcg-browser"
+    },
     "pokemon-grid-large": {
       "type": "pokemon-card-grid-4x3",
       "settings": {
         "show_title": true,
         "title": "Large Pokemon Collection",
-        "description": "12-card collection with individual purchases or bundle deals",
+        "description": "Click empty slots to browse and add cards from the Pokemon TCG database",
         "show_buy_all": true,
         "collection_price": "$129.99"
       }
@@ -16,6 +19,7 @@
   },
   "order": [
     "main",
+    "pokemon-tcg-browser",
     "pokemon-grid-large"
   ]
 }

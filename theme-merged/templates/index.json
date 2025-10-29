@@ -5,17 +5,20 @@
       "settings": {
         "title": "PokePage",
         "subtitle": "POKEMON CARD COLLECTIONS",
-        "description": "Create custom card collection pages • Buy individual cards or complete sets",
+        "description": "Browse thousands of Pokemon cards from all eras • Build custom collections",
         "show_cta": true,
         "cta_text": "Start Building Collections",
-        "cta_link": "#card-builder"
+        "cta_link": "/pages/page-builder"
       }
+    },
+    "pokemon-tcg-browser": {
+      "type": "pokemon-tcg-browser"
     },
     "pokemon-card-builder": {
       "type": "pokemon-card-builder",
       "settings": {
         "hero_title": "Create Custom Pokemon Card Collections",
-        "hero_description": "Build beautiful collection pages with 3x3 or 4x3 card grids. Let customers buy individual cards or complete sets.",
+        "hero_description": "Browse the official Pokemon TCG database and build beautiful collection pages with 3x3 or 4x3 card grids.",
         "show_instructions": true
       }
     },
@@ -59,6 +62,7 @@
   },
   "order": [
     "pokepage-hero",
+    "pokemon-tcg-browser",
     "pokemon-card-builder",
     "about-ahmed",
     "newsletter-signup"

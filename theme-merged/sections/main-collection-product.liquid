@@ -1,0 +1,259 @@
+{{ 'section-main-collection-product.css' | asset_url | stylesheet_tag }}
+
+<section class="main-collection-product">
+  <div class="collection-product-container page-width">
+    <div class="collection-product-grid">
+      <!-- Product Images/Preview -->
+      <div class="collection-preview-area">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'collection_preview' %}
+              <div class="collection-preview-block" {{ block.shopify_attributes }}>
+                <div class="collection-preview-wrapper">
+                  {% if product.metafields.custom.collection_data %}
+                    {% assign collection_data = product.metafields.custom.collection_data | parse_json %}
+                    <div class="collection-grid-preview grid-{{ collection_data.layout | default: '3x3' }}">
+                      {% assign total_slots = 9 %}
+                      {% if collection_data.layout == '4x3' %}
+                        {% assign total_slots = 12 %}
+                      {% elsif collection_data.layout == '2x4' %}
+                        {% assign total_slots = 8 %}
+                      {% endif %}
+                      
+                      {% for i in (1..total_slots) %}
+                        {% assign slot_index = i | minus: 1 %}
+                        {% assign card_data = collection_data.cards[slot_index] %}
+                        
+                        <div class="collection-slot">
+                          {% if card_data %}
+                            <img src="{{ card_data.images.small | default: card_data.image }}" 
+                                 alt="{{ card_data.name }}" 
+                                 class="collection-card-image"
+                                 loading="lazy">
+                          {% else %}
+                            <div class="empty-slot">
+                              <span class="slot-placeholder">Empty</span>
+                            </div>
+                          {% endif %}
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <!-- Fallback for products without collection data -->
+                    <div class="product-media">
+                      {% if product.featured_media %}
+                        <img src="{{ product.featured_media | image_url: width: 600 }}" 
+                             alt="{{ product.featured_media.alt | escape }}"
+                             class="product-image">
+                      {% else %}
+                        <div class="no-image-placeholder">
+                          <span>No preview available</span>
+                        </div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+
+      <!-- Product Information -->
+      <div class="collection-product-info">
+        {% for block in section.blocks %}
+          {% case block.type %}
+            {% when 'title' %}
+              <div class="product-title-block" {{ block.shopify_attributes }}>
+                <h1 class="product-title">
+                  {{ product.title }}
+                </h1>
+              </div>
+
+            {% when 'price' %}
+              <div class="product-price-block" {{ block.shopify_attributes }}>
+                <div class="price-wrapper">
+                  <span class="price">
+                    {{ product.price | money }}
+                  </span>
+                  {% if product.compare_at_price > product.price %}
+                    <span class="compare-price">
+                      {{ product.compare_at_price | money }}
+                    </span>
+                  {% endif %}
+                </div>
+              </div>
+
+            {% when 'variant_picker' %}
+              {% unless product.has_only_default_variant %}
+                <div class="variant-picker-block" {{ block.shopify_attributes }}>
+                  <product-form class="product-form">
+                    <div class="product-form__input">
+                      {% for option in product.options_with_values %}
+                        <fieldset class="product-form__input">
+                          <legend class="form__label">{{ option.name }}</legend>
+                          {% for value in option.values %}
+                            <input type="radio" 
+                                   id="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}"
+                                   name="{{ option.name }}"
+                                   value="{{ value | escape }}"
+                                   form="{{ product_form_id }}"
+                                   {% if option.selected_value == value %}checked{% endif %}>
+                            <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
+                              {{ value }}
+                            </label>
+                          {% endfor %}
+                        </fieldset>
+                      {% endfor %}
+                    </div>
+                  </product-form>
+                </div>
+              {% endunless %}
+
+            {% when 'buy_buttons' %}
+              <div class="buy-buttons-block" {{ block.shopify_attributes }}>
+                <product-form class="product-form">
+                  <form action="/cart/add" method="post" enctype="multipart/form-data" id="{{ product_form_id }}">
+                    <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                    
+                    <div class="product-form__buttons">
+                      <button type="submit" 
+                              name="add"
+                              class="btn btn-primary product-form__cart-submit"
+                              {% if product.selected_or_first_available_variant.available == false %}disabled{% endif %}>
+                        <span>
+                          {% if product.selected_or_first_available_variant.available %}
+                            Add to cart - {{ product.selected_or_first_available_variant.price | money }}
+                          {% else %}
+                            Sold out
+                          {% endif %}
+                        </span>
+                      </button>
+                      
+                      {% if block.settings.show_dynamic_checkout %}
+                        {{ form | payment_button }}
+                      {% endif %}
+                    </div>
+                  </form>
+                </product-form>
+              </div>
+
+            {% when 'description' %}
+              {% if product.description != blank %}
+                <div class="product-description-block" {{ block.shopify_attributes }}>
+                  <div class="product-description">
+                    {{ product.description }}
+                  </div>
+                </div>
+              {% endif %}
+
+            {% when 'collection_details' %}
+              <div class="collection-details-block" {{ block.shopify_attributes }}>
+                {% if product.metafields.custom.collection_data %}
+                  {% assign collection_data = product.metafields.custom.collection_data | parse_json %}
+                  <div class="collection-details">
+                    <h3>Collection Details</h3>
+                    <div class="detail-grid">
+                      <div class="detail-item">
+                        <span class="detail-label">Layout:</span>
+                        <span class="detail-value">{{ collection_data.layout | upcase }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Theme:</span>
+                        <span class="detail-value">{{ collection_data.theme | capitalize }}</span>
+                      </div>
+                      <div class="detail-item">
+                        <span class="detail-label">Total Cards:</span>
+                        <span class="detail-value">{{ collection_data.totalCards | default: 0 }}</span>
+                      </div>
+                      {% if collection_data.cards %}
+                        <div class="detail-item">
+                          <span class="detail-label">Cards Included:</span>
+                          <div class="cards-list">
+                            {% for card_pair in collection_data.cards %}
+                              {% assign card = card_pair[1] %}
+                              <span class="card-name">{{ card.name }}</span>
+                            {% endfor %}
+                          </div>
+                        </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endif %}
+              </div>
+          {% endcase %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Collection Product",
+  "class": "section",
+  "blocks": [
+    {
+      "type": "title",
+      "name": "Title",
+      "limit": 1
+    },
+    {
+      "type": "collection_preview",
+      "name": "Collection Preview",
+      "limit": 1
+    },
+    {
+      "type": "price",
+      "name": "Price",
+      "limit": 1
+    },
+    {
+      "type": "variant_picker",
+      "name": "Variant picker",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "select",
+          "id": "picker_type",
+          "options": [
+            {
+              "value": "dropdown",
+              "label": "Dropdown"
+            },
+            {
+              "value": "button",
+              "label": "Buttons"
+            }
+          ],
+          "default": "button",
+          "label": "Type"
+        }
+      ]
+    },
+    {
+      "type": "buy_buttons",
+      "name": "Buy buttons",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_dynamic_checkout",
+          "default": true,
+          "label": "Show dynamic checkout buttons",
+          "info": "Lets customers check out directly using a familiar payment method. [Learn more](https://help.shopify.com/manual/using-themes/change-the-layout/dynamic-checkout)"
+        }
+      ]
+    },
+    {
+      "type": "description",
+      "name": "Description",
+      "limit": 1
+    },
+    {
+      "type": "collection_details",
+      "name": "Collection Details",
+      "limit": 1
+    }
+  ]
+}
+{% endschema %}

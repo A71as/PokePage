@@ -152,9 +152,9 @@
             </div>
           {% endif %}
         {% else %}
-          <div class="empty-slot-content">
+          <div class="empty-slot-content" onclick="openCardBrowserForSlot({{ i }}, '3x3')">
             <div>Empty Slot {{ i }}</div>
-            <small>Add a card</small>
+            <small>Click to browse cards</small>
           </div>
         {% endif %}
       </div>
@@ -171,6 +171,9 @@
 </div>
 
 <script>
+let currentGridSlot = null;
+let currentGridType = null;
+
 function addToCart(variantId) {
   fetch('/cart/add.js', {
     method: 'POST',
@@ -192,6 +195,56 @@ function addToCart(variantId) {
   .catch(error => {
     console.error('Error:', error);
   });
+}
+
+function openCardBrowserForSlot(slotNumber, gridType) {
+  currentGridSlot = slotNumber;
+  currentGridType = gridType;
+  
+  // If browser doesn't exist yet, we need to wait for it
+  if (typeof openCardBrowser === 'function') {
+    openCardBrowser();
+  } else {
+    // Fallback: show message to scroll to browser section
+    alert('Please scroll down to the Pokemon TCG Browser section to select cards!');
+  }
+}
+
+// Listen for card selection from browser
+document.addEventListener('cardSelected', function(event) {
+  if (currentGridSlot && currentGridType) {
+    populateGridSlot(currentGridSlot, currentGridType, event.detail);
+    currentGridSlot = null;
+    currentGridType = null;
+  }
+});
+
+function populateGridSlot(slotNumber, gridType, cardData) {
+  const slotSelector = gridType === '3x3' ? 
+    `.pokemon-grid-3x3 .pokemon-card-slot:nth-child(${slotNumber})` :
+    `.pokemon-grid-4x3 .pokemon-card-slot-4x3:nth-child(${slotNumber})`;
+  
+  const slot = document.querySelector(slotSelector);
+  if (slot) {
+    slot.innerHTML = `
+      <img src="${cardData.imageUrl}" 
+           alt="${cardData.name}" 
+           class="pokemon-card-image${gridType === '4x3' ? '-4x3' : ''}">
+      <div class="pokemon-card-info${gridType === '4x3' ? '-4x3' : ''}">
+        <div class="pokemon-card-name${gridType === '4x3' ? '-4x3' : ''}">${cardData.name}</div>
+        <div class="pokemon-card-price${gridType === '4x3' ? '-4x3' : ''}">$${cardData.price || 'N/A'}</div>
+      </div>
+      <button class="buy-card-btn${gridType === '4x3' ? '-4x3' : ''}" onclick="buyTCGCard('${cardData.id}')">
+        Buy
+      </button>
+    `;
+    slot.classList.add('has-card');
+  }
+}
+
+function buyTCGCard(cardId) {
+  // This would integrate with your e-commerce system
+  alert(`Buying card ${cardId}. This would integrate with your Shopify product system.`);
 }
 </script>
 

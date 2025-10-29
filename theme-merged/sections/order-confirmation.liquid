@@ -1,0 +1,111 @@
+{{ 'section-order-confirmation.css' | asset_url | stylesheet_tag }}
+
+<div class="order-confirmation">
+  <div class="confirmation-container page-width">
+    <div class="confirmation-header">
+      <div class="success-icon">✓</div>
+      {% if section.settings.title != blank %}
+        <h1 class="confirmation-title">{{ section.settings.title }}</h1>
+      {% endif %}
+      {% if section.settings.subtitle != blank %}
+        <p class="confirmation-subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+
+    <div class="confirmation-content">
+      <div class="confirmation-message">
+        <h2>Your order has been received!</h2>
+        <p>We've received your custom Pokemon collection order and will begin processing it shortly. You should receive a confirmation email within the next few minutes.</p>
+        
+        <div class="next-steps">
+          <h3>What happens next?</h3>
+          <div class="steps-grid">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h4>Order Review</h4>
+                <p>Our team will review your collection and confirm card availability</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h4>Collection Assembly</h4>
+                <p>We'll carefully assemble your custom Pokemon card collection</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h4>Quality Check</h4>
+                <p>Each card is inspected for quality before packaging</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="step-number">4</div>
+              <div class="step-content">
+                <h4>Shipping</h4>
+                <p>Your collection will be securely packaged and shipped</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="contact-info">
+          <h3>Questions about your order?</h3>
+          <p>If you have any questions or need to make changes to your order, please contact us:</p>
+          <div class="contact-methods">
+            <div class="contact-method">
+              <strong>Email:</strong> orders@pokepage.com
+            </div>
+            <div class="contact-method">
+              <strong>Phone:</strong> (555) 123-POKE
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="confirmation-actions">
+        <a href="/pages/page-builder" class="btn-primary">Create Another Collection</a>
+        <a href="/" class="btn-secondary">Return to Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Order Confirmation",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Order Confirmation"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Thank you for your Pokemon collection order!"
+    },
+    {
+      "type": "text",
+      "id": "contact_email",
+      "label": "Contact Email",
+      "default": "orders@pokepage.com"
+    },
+    {
+      "type": "text",
+      "id": "contact_phone",
+      "label": "Contact Phone",
+      "default": "(555) 123-POKE"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Order Confirmation"
+    }
+  ]
+}
+{% endschema %}

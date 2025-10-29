@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "order-confirmation",
+      "settings": {
+        "title": "Order Confirmation",
+        "subtitle": "Thank you for your Pokemon collection order!"
+      }
+    }
+  },
+  "order": ["main"]
+}

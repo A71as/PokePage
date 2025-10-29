@@ -160,9 +160,9 @@
             </div>
           {% endif %}
         {% else %}
-          <div class="empty-slot-content-4x3">
+          <div class="empty-slot-content-4x3" onclick="openCardBrowserForSlot({{ i }}, '4x3')">
             <div>Empty {{ i }}</div>
-            <small>Add card</small>
+            <small>Click to browse cards</small>
           </div>
         {% endif %}
       </div>
@@ -179,28 +179,8 @@
 </div>
 
 <script>
-function addToCart(variantId) {
-  fetch('/cart/add.js', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      items: [{
-        id: variantId,
-        quantity: 1
-      }]
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    // Show success message or update cart
-    alert('Card added to cart!');
-  })
-  .catch(error => {
-    console.error('Error:', error);
-  });
-}
+// 4x3 Grid JavaScript is handled by the 3x3 grid script
+// This avoids duplicate function definitions
 </script>
 
 {% schema %}

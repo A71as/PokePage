@@ -1,0 +1,557 @@
+{% comment %}
+  Pokemon TCG Card Browser
+  Integrates with Pokemon TCG API to browse cards by era, sets, and individual cards
+{% endcomment %}
+
+<style>
+  .pokemon-card-browser {
+    position: fixed;
+    top: 0;
+    right: -400px;
+    width: 400px;
+    height: 100vh;
+    background: white;
+    box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .pokemon-card-browser.open {
+    right: 0;
+  }
+  
+  .browser-header {
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .browser-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .close-browser {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #6b7280;
+    padding: 4px;
+  }
+  
+  .browser-tabs {
+    display: flex;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  
+  .browser-tab {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    text-align: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    color: #6b7280;
+    transition: all 0.2s ease;
+  }
+  
+  .browser-tab.active {
+    background: white;
+    color: #3b82f6;
+    border-bottom: 2px solid #3b82f6;
+  }
+  
+  .browser-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+  }
+  
+  .era-list, .set-list, .card-list {
+    display: none;
+  }
+  
+  .era-list.active, .set-list.active, .card-list.active {
+    display: block;
+  }
+  
+  .era-item, .set-item {
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .era-item:hover, .set-item:hover {
+    background: #f3f4f6;
+    border-color: #3b82f6;
+  }
+  
+  .era-name, .set-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+  }
+  
+  .era-description, .set-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+  
+  .card-item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .card-item:hover {
+    background: #f3f4f6;
+    border-color: #10b981;
+  }
+  
+  .card-thumbnail {
+    width: 40px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-right: 0.75rem;
+  }
+  
+  .card-info {
+    flex: 1;
+  }
+  
+  .card-name {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .card-details {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .loading-spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+  }
+  
+  .spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid #e5e7eb;
+    border-top: 3px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .search-box {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  
+  .search-box:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .back-button {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+  }
+  
+  .back-button:hover {
+    background: #e5e7eb;
+  }
+  
+  .open-browser-btn {
+    position: fixed;
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px 0 0 8px;
+    cursor: pointer;
+    font-weight: 600;
+    z-index: 999;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  }
+  
+  @media (max-width: 768px) {
+    .pokemon-card-browser {
+      width: 100%;
+      right: -100%;
+    }
+    
+    .open-browser-btn {
+      right: 10px;
+      padding: 10px 12px;
+      font-size: 0.875rem;
+    }
+  }
+</style>
+
+<button class="open-browser-btn" onclick="openCardBrowser()">
+  Browse Cards
+</button>
+
+<div class="pokemon-card-browser" id="cardBrowser">
+  <div class="browser-header">
+    <div class="browser-title">Pokemon TCG Browser</div>
+    <button class="close-browser" onclick="closeCardBrowser()">&times;</button>
+  </div>
+  
+  <div class="browser-tabs">
+    <button class="browser-tab active" onclick="switchTab('eras')">Eras</button>
+    <button class="browser-tab" onclick="switchTab('sets')">Sets</button>
+    <button class="browser-tab" onclick="switchTab('cards')">Cards</button>
+  </div>
+  
+  <div class="browser-content">
+    <div class="era-list active" id="eraList">
+      <div class="loading-spinner">
+        <div class="spinner"></div>
+      </div>
+    </div>
+    
+    <div class="set-list" id="setList">
+      <button class="back-button" onclick="switchTab('eras')" style="display: none;">← Back to Eras</button>
+      <input type="text" class="search-box" placeholder="Search sets..." onkeyup="filterSets(this.value)" style="display: none;">
+      <div id="setListContent"></div>
+    </div>
+    
+    <div class="card-list" id="cardList">
+      <button class="back-button" onclick="switchTab('sets')" style="display: none;">← Back to Sets</button>
+      <input type="text" class="search-box" placeholder="Search cards..." onkeyup="filterCards(this.value)" style="display: none;">
+      <div id="cardListContent"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const POKEMON_TCG_API_KEY = '27cc9548-6ecd-4502-8b2d-267e2ef1bb61';
+const API_BASE_URL = 'https://api.pokemontcg.io/v2';
+
+// Pokemon TCG Eras with their corresponding sets
+const POKEMON_ERAS = {
+  'vintage': {
+    name: 'Vintage Era',
+    description: 'Original Pokemon cards from 1998-2003',
+    sets: ['base1', 'base2', 'base3', 'base4', 'base5', 'gym1', 'gym2', 'neo1', 'neo2', 'neo3', 'neo4']
+  },
+  'e-card': {
+    name: 'e-Card Series',
+    description: '2001-2003 cards with e-Reader compatibility',
+    sets: ['ecard1', 'ecard2', 'ecard3']
+  },
+  'ex': {
+    name: 'EX Series',
+    description: '2003-2007 era featuring Pokemon-ex',
+    sets: ['ex1', 'ex2', 'ex3', 'ex4', 'ex5', 'ex6', 'ex7', 'ex8', 'ex9', 'ex10', 'ex11', 'ex12']
+  },
+  'dp': {
+    name: 'Diamond & Pearl',
+    description: '2007-2009 Sinnoh region cards',
+    sets: ['dp1', 'dp2', 'dp3', 'dp4', 'dp5', 'dp6', 'dp7']
+  },
+  'hgss': {
+    name: 'HeartGold & SoulSilver',
+    description: '2010-2011 Johto region return',
+    sets: ['hgss1', 'hgss2', 'hgss3', 'hgss4']
+  },
+  'bw': {
+    name: 'Black & White',
+    description: '2011-2013 Unova region cards',
+    sets: ['bw1', 'bw2', 'bw3', 'bw4', 'bw5', 'bw6', 'bw7', 'bw8', 'bw9', 'bw10', 'bw11']
+  },
+  'xy': {
+    name: 'XY Series',
+    description: '2014-2016 Kalos region and Mega Evolution',
+    sets: ['xy1', 'xy2', 'xy3', 'xy4', 'xy5', 'xy6', 'xy7', 'xy8', 'xy9', 'xy10', 'xy11', 'xy12']
+  },
+  'sm': {
+    name: 'Sun & Moon',
+    description: '2017-2019 Alola region cards',
+    sets: ['sm1', 'sm2', 'sm3', 'sm4', 'sm5', 'sm6', 'sm7', 'sm8', 'sm9', 'sm10', 'sm11', 'sm12']
+  },
+  'swsh': {
+    name: 'Sword & Shield',
+    description: '2020-2022 Galar region cards',
+    sets: ['swsh1', 'swsh2', 'swsh3', 'swsh4', 'swsh5', 'swsh6', 'swsh7', 'swsh8', 'swsh9', 'swsh10', 'swsh11', 'swsh12']
+  },
+  'sv': {
+    name: 'Scarlet & Violet',
+    description: '2023+ Paldea region cards',
+    sets: ['sv1', 'sv2', 'sv3', 'sv4', 'sv5']
+  }
+};
+
+let currentEra = null;
+let currentSet = null;
+let allSets = [];
+let currentCards = [];
+
+// API Functions
+async function makeApiRequest(endpoint) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/${endpoint}`, {
+      headers: {
+        'X-Api-Key': POKEMON_TCG_API_KEY
+      }
+    });
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('API request failed:', error);
+    return null;
+  }
+}
+
+async function fetchSets() {
+  const data = await makeApiRequest('sets?pageSize=250');
+  return data ? data.data : [];
+}
+
+async function fetchCards(setId, page = 1) {
+  const data = await makeApiRequest(`cards?q=set.id:${setId}&pageSize=100&page=${page}`);
+  return data ? data.data : [];
+}
+
+// UI Functions
+function openCardBrowser() {
+  document.getElementById('cardBrowser').classList.add('open');
+  if (document.getElementById('eraList').children.length === 1) {
+    initializeEras();
+  }
+}
+
+function closeCardBrowser() {
+  document.getElementById('cardBrowser').classList.remove('open');
+}
+
+function switchTab(tab) {
+  // Update tab buttons
+  document.querySelectorAll('.browser-tab').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  // Show/hide content
+  document.querySelectorAll('.era-list, .set-list, .card-list').forEach(list => {
+    list.classList.remove('active');
+  });
+  
+  if (tab === 'eras') {
+    document.getElementById('eraList').classList.add('active');
+  } else if (tab === 'sets') {
+    document.getElementById('setList').classList.add('active');
+    document.querySelector('#setList .back-button').style.display = 'block';
+    document.querySelector('#setList .search-box').style.display = 'block';
+    if (allSets.length === 0) {
+      loadAllSets();
+    }
+  } else if (tab === 'cards') {
+    document.getElementById('cardList').classList.add('active');
+    document.querySelector('#cardList .back-button').style.display = 'block';
+    document.querySelector('#cardList .search-box').style.display = 'block';
+  }
+}
+
+function initializeEras() {
+  const eraList = document.getElementById('eraList');
+  eraList.innerHTML = '';
+  
+  Object.entries(POKEMON_ERAS).forEach(([key, era]) => {
+    const eraDiv = document.createElement('div');
+    eraDiv.className = 'era-item';
+    eraDiv.onclick = () => selectEra(key, era);
+    eraDiv.innerHTML = `
+      <div class="era-name">${era.name}</div>
+      <div class="era-description">${era.description}</div>
+    `;
+    eraList.appendChild(eraDiv);
+  });
+}
+
+async function loadAllSets() {
+  const setListContent = document.getElementById('setListContent');
+  setListContent.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  
+  allSets = await fetchSets();
+  displaySets(allSets);
+}
+
+function displaySets(sets) {
+  const setListContent = document.getElementById('setListContent');
+  setListContent.innerHTML = '';
+  
+  sets.forEach(set => {
+    const setDiv = document.createElement('div');
+    setDiv.className = 'set-item';
+    setDiv.onclick = () => selectSet(set);
+    setDiv.innerHTML = `
+      <div class="set-name">${set.name}</div>
+      <div class="set-description">${set.series} • ${set.total} cards • Released ${set.releaseDate}</div>
+    `;
+    setListContent.appendChild(setDiv);
+  });
+}
+
+async function selectSet(set) {
+  currentSet = set;
+  switchTab('cards');
+  
+  const cardListContent = document.getElementById('cardListContent');
+  cardListContent.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  
+  currentCards = await fetchCards(set.id);
+  displayCards(currentCards);
+}
+
+function displayCards(cards) {
+  const cardListContent = document.getElementById('cardListContent');
+  cardListContent.innerHTML = '';
+  
+  cards.forEach(card => {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card-item';
+    cardDiv.onclick = () => selectCard(card);
+    
+    const imageUrl = card.images?.small || card.images?.large || '';
+    const rarity = card.rarity || 'Common';
+    const cardNumber = card.number || '';
+    
+    cardDiv.innerHTML = `
+      <img src="${imageUrl}" alt="${card.name}" class="card-thumbnail" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNTYiIHZpZXdCb3g9IjAgMCA0MCA1NiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjU2IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyOEMyMi43NjE0IDI4IDI1IDI1Ljc2MTQgMjUgMjNDMjUgMjAuMjM4NiAyMi43NjE0IDE4IDIwIDE4QzE3LjIzODYgMTggMTUgMjAuMjM4NiAxNSAyM0MxNSAyNS43NjE0IDE3LjIzODYgMjggMjAgMjhaIiBmaWxsPSIjOUI5QkEwIi8+Cjwvc3ZnPgo='">
+      <div class="card-info">
+        <div class="card-name">${card.name}</div>
+        <div class="card-details">${rarity} • #${cardNumber}</div>
+      </div>
+    `;
+    cardListContent.appendChild(cardDiv);
+  });
+}
+
+function selectCard(card) {
+  const cardInfo = {
+    name: card.name,
+    id: card.id,
+    imageUrl: card.images?.large || card.images?.small || '',
+    rarity: card.rarity || 'Common',
+    number: card.number || '',
+    set: card.set?.name || '',
+    price: card.cardmarket?.prices?.averageSellPrice || 'N/A'
+  };
+  
+  // Store selected card for use in grid population
+  window.selectedPokemonCard = cardInfo;
+  
+  // Dispatch custom event for grid integration
+  const cardSelectedEvent = new CustomEvent('cardSelected', {
+    detail: cardInfo
+  });
+  document.dispatchEvent(cardSelectedEvent);
+  
+  // Show success message
+  const message = `✅ Selected: ${cardInfo.name}\n📦 Set: ${cardInfo.set}\n⭐ Rarity: ${cardInfo.rarity}\n\nCard will be added to your grid!`;
+  alert(message);
+  
+  closeCardBrowser();
+}
+
+function filterSets(query) {
+  if (!query) {
+    displaySets(allSets);
+    return;
+  }
+  
+  const filtered = allSets.filter(set => 
+    set.name.toLowerCase().includes(query.toLowerCase()) ||
+    set.series.toLowerCase().includes(query.toLowerCase())
+  );
+  
+  displaySets(filtered);
+}
+
+function filterCards(query) {
+  if (!query) {
+    displayCards(currentCards);
+    return;
+  }
+  
+  const filtered = currentCards.filter(card =>
+    card.name.toLowerCase().includes(query.toLowerCase()) ||
+    (card.rarity && card.rarity.toLowerCase().includes(query.toLowerCase()))
+  );
+  
+  displayCards(filtered);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  // Browser will be initialized when first opened
+});
+</script>
+
+{% schema %}
+{
+  "name": "Pokemon TCG Card Browser",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Pokemon TCG API Integration"
+    },
+    {
+      "type": "paragraph",
+      "content": "This section provides a card browser that integrates with the Pokemon TCG API to let users browse and select cards by era, set, and individual cards."
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pokemon TCG Card Browser"
+    }
+  ]
+}
+{% endschema %}

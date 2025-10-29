@@ -1,0 +1,12 @@
+{
+  "sections": {
+    "main": {
+      "type": "pokemon-collection-checkout",
+      "settings": {
+        "title": "Complete Your Collection Order",
+        "subtitle": "Review your custom Pokemon collection and complete your purchase"
+      }
+    }
+  },
+  "order": ["main"]
+}

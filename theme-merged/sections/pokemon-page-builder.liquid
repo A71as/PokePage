@@ -1,0 +1,177 @@
+{{ 'section-pokemon-page-builder.css' | asset_url | stylesheet_tag }}
+
+<div class="pokemon-page-builder">
+  <div class="page-builder-header">
+    {% if section.settings.title != blank %}
+      <h1 class="page-builder-title">{{ section.settings.title }}</h1>
+    {% endif %}
+    {% if section.settings.subtitle != blank %}
+      <p class="page-builder-subtitle">{{ section.settings.subtitle }}</p>
+    {% endif %}
+  </div>
+
+  <div class="page-builder-container">
+    <!-- Builder Controls -->
+    <div class="builder-controls">
+      <div class="control-group">
+        <label>Page Layout:</label>
+        <select id="pageLayout" class="layout-selector">
+          <option value="3x3">3x3 Grid (9 cards)</option>
+          <option value="4x3">4x3 Grid (12 cards)</option>
+          <option value="2x4">2x4 Grid (8 cards)</option>
+          <option value="custom">Custom Layout</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label>Page Title:</label>
+        <input type="text" id="pageTitle" placeholder="My Pokemon Collection" maxlength="50">
+      </div>
+
+      <div class="control-group">
+        <label>Collection Theme:</label>
+        <select id="collectionTheme" class="theme-selector">
+          <option value="classic">Classic</option>
+          <option value="modern">Modern</option>
+          <option value="vintage">Vintage</option>
+          <option value="holographic">Holographic</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <button id="clearAll" class="btn-secondary">Clear All Cards</button>
+        <button id="saveCollection" class="btn-primary">Save Collection</button>
+      </div>
+    </div>
+
+    <!-- Main Builder Area -->
+    <div class="builder-main">
+      <!-- Card Browser Toggle -->
+      <div class="browser-toggle">
+        <button id="toggleBrowser" class="btn-browser">
+          <span class="browser-icon">🔍</span>
+          Browse Pokemon Cards
+        </button>
+      </div>
+
+      <!-- Page Preview -->
+      <div class="page-preview">
+        <div class="preview-header">
+          <h3 id="previewTitle">My Pokemon Collection</h3>
+          <div class="preview-controls">
+            <button id="previewMode" class="btn-preview">Preview Mode</button>
+            <button id="editMode" class="btn-edit active">Edit Mode</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Grid Container -->
+        <div id="cardGrid" class="card-grid grid-3x3">
+          <!-- Grid slots will be generated dynamically -->
+        </div>
+      </div>
+
+      <!-- Pricing and Checkout -->
+      {% if section.settings.show_pricing %}
+      <div class="pricing-section">
+        <div class="pricing-card">
+          <h3>Your Collection Pricing</h3>
+          <div class="price-breakdown">
+            <div class="price-item">
+              <span>Base Page Cost:</span>
+              <span id="baseCost">$15.00</span>
+            </div>
+            <div class="price-item">
+              <span>Cards Selected:</span>
+              <span id="cardCount">0</span>
+            </div>
+            <div class="price-item">
+              <span>Card Cost:</span>
+              <span id="cardCost">$0.00</span>
+            </div>
+            <div class="price-item total">
+              <span>Total Cost:</span>
+              <span id="totalCost">$15.00</span>
+            </div>
+          </div>
+          <button id="addToCart" class="btn-add-to-cart" disabled>
+            Add Collection to Cart
+          </button>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Pokemon Card Browser (Reuse existing) -->
+    <div id="pokemonBrowser" class="pokemon-browser-sidebar">
+      {% render 'pokemon-tcg-browser-content' %}
+    </div>
+  </div>
+
+  <!-- Collection Data (Hidden) -->
+  <form id="collectionForm" style="display: none;">
+    <input type="hidden" id="collectionData" name="collection_data">
+    <input type="hidden" id="collectionTitle" name="collection_title">
+    <input type="hidden" id="collectionLayout" name="collection_layout">
+    <input type="hidden" id="collectionTheme" name="collection_theme">
+    <input type="hidden" id="collectionPrice" name="collection_price">
+  </form>
+</div>
+
+<script src="{{ 'pokemon-page-builder.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Pokemon Page Builder",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Create Your Pokemon Collection Page"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Build custom Pokemon card collection pages with our interactive builder"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pricing",
+      "label": "Show Pricing Section",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_preview",
+      "label": "Enable Preview Mode",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "base_price",
+      "label": "Base Page Price",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "default": 15,
+      "unit": "$"
+    },
+    {
+      "type": "range",
+      "id": "card_price",
+      "label": "Price Per Card",
+      "min": 1,
+      "max": 10,
+      "step": 0.5,
+      "default": 2.5,
+      "unit": "$"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pokemon Page Builder"
+    }
+  ]
+}
+{% endschema %}

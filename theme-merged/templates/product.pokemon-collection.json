@@ -1,10 +1,14 @@
 {
   "sections": {
     "main": {
-      "type": "main-product",
+      "type": "main-collection-product",
       "blocks": {
         "title": {
           "type": "title",
+          "settings": {}
+        },
+        "collection_preview": {
+          "type": "collection_preview",
           "settings": {}
         },
         "price": {
@@ -22,26 +26,32 @@
         "description": {
           "type": "description",
           "settings": {}
+        },
+        "collection_details": {
+          "type": "collection_details",
+          "settings": {}
         }
       },
       "block_order": [
         "title",
+        "collection_preview",
         "price",
         "variant_picker",
         "buy_buttons",
-        "description"
+        "description",
+        "collection_details"
       ]
     },
-    "related-products": {
+    "recommendations": {
       "type": "related-products",
       "settings": {
-        "heading": "More Pokemon Cards",
-        "products_to_show": 8
+        "heading": "Similar Collections",
+        "products_to_show": 4
       }
     }
   },
   "order": [
     "main",
-    "related-products"
+    "recommendations"
   ]
 }

@@ -1,0 +1,16 @@
+{
+  "sections": {
+    "main": {
+      "type": "pokemon-page-builder",
+      "settings": {
+        "title": "Create Your Pokemon Collection Page",
+        "subtitle": "Build custom Pokemon card collection pages with our interactive builder",
+        "show_pricing": true,
+        "enable_preview": true,
+        "base_price": 15,
+        "card_price": 2.5
+      }
+    }
+  },
+  "order": ["main"]
+}

@@ -186,7 +186,7 @@
   }
 </style>
 
-<div class="pokemon-card-builder">
+<div class="pokemon-card-builder" id="card-builder">
   <div class="card-builder-hero">
     <h1>{{ section.settings.hero_title | default: 'Create Your Pokemon Card Collection' }}</h1>
     <p>{{ section.settings.hero_description | default: 'Build custom card collection pages and let customers buy individual cards or complete sets' }}</p>
@@ -207,7 +207,7 @@
         <li>Collection bundle pricing</li>
         <li>Mobile responsive</li>
       </ul>
-      <button class="create-page-btn" onclick="showInstructions('3x3')">
+      <button class="create-page-btn" onclick="openPageBuilder('3x3')">
         Create 3x3 Collection Page
       </button>
     </div>
@@ -226,7 +226,7 @@
         <li>Collection bundle pricing</li>
         <li>Compact mobile view</li>
       </ul>
-      <button class="create-page-btn" onclick="showInstructions('4x3')">
+      <button class="create-page-btn" onclick="openPageBuilder('4x3')">
         Create 4x3 Collection Page
       </button>
     </div>
@@ -269,46 +269,580 @@
   </div>
 </div>
 
+<!-- Full Screen Page Builder Modal -->
+<div id="page-builder-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; overflow-y: auto;">
+  <div class="page-builder-modal-content" style="width: 100%; min-height: 100%; background: white;">
+    <div style="position: sticky; top: 0; background: white; z-index: 10001; padding: 1rem; border-bottom: 1px solid #e1e5e9; display: flex; justify-content: between; align-items: center;">
+      <h2 style="margin: 0; font-size: 1.5rem;">Pokemon Collection Builder</h2>
+      <button onclick="closePageBuilder()" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-left: auto;">
+        Close Builder
+      </button>
+    </div>
+    <div id="modal-page-builder">
+      <!-- Page builder content will be loaded here -->
+    </div>
+  </div>
+</div>
+
 <script>
-function showInstructions(type) {
-  const modal = document.getElementById('instructions-modal');
-  const title = document.getElementById('modal-title');
-  const content = document.getElementById('modal-content');
+function openPageBuilder(layout) {
+  const modal = document.getElementById('page-builder-modal');
+  const content = document.getElementById('modal-page-builder');
   
-  title.textContent = `Create ${type} Collection Page`;
+  // Show the modal
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
   
-  content.innerHTML = `
-    <p><strong>To create a ${type} Pokemon card collection page:</strong></p>
-    <ol style="margin: 1rem 0; padding-left: 1.5rem;">
-      <li>Go to your Shopify Admin → Online Store → Pages</li>
-      <li>Click "Add page"</li>
-      <li>Give your page a title (e.g., "Pikachu Evolution Set")</li>
-      <li>In the page content editor, add a section</li>
-      <li>Choose "Pokemon Card Grid ${type}" from the section list</li>
-      <li>Configure each card slot with products from your inventory</li>
-      <li>Set your collection bundle price</li>
-      <li>Save and publish your page</li>
-    </ol>
-    <p><strong>Tips:</strong></p>
-    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
-      <li>Create products for each individual Pokemon card first</li>
-      <li>Use high-quality card images (at least 400x600px)</li>
-      <li>Consider themed collections (evolution chains, same type, etc.)</li>
-      <li>Bundle pricing should offer savings vs. individual cards</li>
-    </ul>
+  // Load the page builder content
+  loadPageBuilderContent(layout, content);
+}
+
+function closePageBuilder() {
+  const modal = document.getElementById('page-builder-modal');
+  modal.style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function loadPageBuilderContent(layout, container) {
+  // Create the page builder HTML structure
+  const pageBuilderHTML = `
+    <div class="pokemon-page-builder" style="padding: 2rem;">
+      <div class="page-builder-header" style="text-align: center; margin-bottom: 2rem;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">Create Your Pokemon Collection Page</h1>
+        <p style="font-size: 1.1rem; color: #6b7280;">Build custom Pokemon card collection pages with our interactive builder</p>
+      </div>
+
+      <div class="page-builder-container" style="display: grid; grid-template-columns: 300px 1fr; gap: 2rem; max-width: 1400px; margin: 0 auto;">
+        <!-- Builder Controls -->
+        <div class="builder-controls" style="background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 1.5rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); height: fit-content;">
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Page Layout:</label>
+            <select id="pageLayout" style="width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px;">
+              <option value="3x3" ${layout === '3x3' ? 'selected' : ''}>3x3 Grid (9 cards)</option>
+              <option value="4x3" ${layout === '4x3' ? 'selected' : ''}>4x3 Grid (12 cards)</option>
+              <option value="2x4">2x4 Grid (8 cards)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Page Title:</label>
+            <input type="text" id="pageTitle" placeholder="My Pokemon Collection" maxlength="50" style="width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px;">
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Collection Theme:</label>
+            <select id="collectionTheme" style="width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px;">
+              <option value="classic">Classic</option>
+              <option value="modern">Modern</option>
+              <option value="vintage">Vintage</option>
+              <option value="holographic">Holographic</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <button id="toggleBrowser" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 1rem 2rem; border-radius: 12px; width: 100%; font-weight: 600; cursor: pointer;">
+              🔍 Browse Pokemon Cards
+            </button>
+          </div>
+
+          <div>
+            <button id="clearAll" style="background: #f1f5f9; color: #475569; border: none; padding: 0.75rem 1rem; border-radius: 8px; margin-right: 0.5rem; cursor: pointer;">Clear All</button>
+            <button id="saveCollection" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white; border: none; padding: 0.75rem 1rem; border-radius: 8px; cursor: pointer;">Save</button>
+          </div>
+        </div>
+
+        <!-- Main Builder Area -->
+        <div class="builder-main" style="background: rgba(255, 255, 255, 0.95); border-radius: 12px; padding: 2rem; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);">
+          <div class="preview-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 2px solid #e1e5e9; padding-bottom: 1rem;">
+            <h3 id="previewTitle" style="font-size: 1.8rem; margin: 0;">My Pokemon Collection</h3>
+            <div>
+              <button id="previewMode" style="padding: 0.5rem 1rem; border: 2px solid #e1e5e9; background: white; border-radius: 6px; margin-right: 0.5rem; cursor: pointer;">Preview</button>
+              <button id="editMode" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: 2px solid #3b82f6; border-radius: 6px; cursor: pointer;">Edit</button>
+            </div>
+          </div>
+
+          <!-- Dynamic Grid Container -->
+          <div id="cardGrid" class="card-grid grid-${layout}" style="display: grid; gap: 1rem; margin-bottom: 2rem; padding: 1rem; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 12px; border: 2px dashed #cbd5e1; min-height: 400px; grid-template-columns: repeat(${layout === '4x3' ? '4' : layout === '2x4' ? '2' : '3'}, 1fr);">
+            <!-- Grid slots will be generated dynamically -->
+          </div>
+
+          <!-- Pricing Section -->
+          <div class="pricing-section" style="margin-top: 2rem;">
+            <div style="background: linear-gradient(135deg, #fef3c7, #fbbf24); padding: 2rem; border-radius: 12px; box-shadow: 0 4px 20px rgba(251, 191, 36, 0.2);">
+              <h3 style="text-align: center; margin-bottom: 1.5rem; color: #92400e;">Your Collection Pricing</h3>
+              <div style="margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(146, 64, 14, 0.2);">
+                  <span>Base Page Cost:</span>
+                  <span id="baseCost">$15.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(146, 64, 14, 0.2);">
+                  <span>Cards Selected:</span>
+                  <span id="cardCount">0</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid rgba(146, 64, 14, 0.2);">
+                  <span>Card Cost:</span>
+                  <span id="cardCost">$0.00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1.2rem; padding-top: 1rem; border-top: 2px solid #92400e; margin-top: 0.5rem;">
+                  <span>Total Cost:</span>
+                  <span id="totalCost">$15.00</span>
+                </div>
+              </div>
+              <button id="addToCart" style="background: linear-gradient(135deg, #dc2626, #b91c1c); color: white; border: none; padding: 1rem 2rem; border-radius: 12px; font-size: 1.2rem; font-weight: 600; cursor: pointer; width: 100%;" disabled>
+                Add Collection to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   `;
   
-  modal.style.display = 'block';
+  container.innerHTML = pageBuilderHTML;
+  
+  // Initialize the grid
+  generateGrid(layout);
+  
+  // Add event listeners
+  setupModalEventListeners();
 }
 
-function closeInstructions() {
-  document.getElementById('instructions-modal').style.display = 'none';
+function generateGrid(layout) {
+  const grid = document.getElementById('cardGrid');
+  let totalSlots;
+  
+  switch(layout) {
+    case '3x3': totalSlots = 9; break;
+    case '4x3': totalSlots = 12; break;
+    case '2x4': totalSlots = 8; break;
+    default: totalSlots = 9;
+  }
+  
+  grid.innerHTML = '';
+  
+  for (let i = 0; i < totalSlots; i++) {
+    const slot = document.createElement('div');
+    slot.className = 'card-slot';
+    slot.dataset.slotIndex = i;
+    slot.style.cssText = `
+      aspect-ratio: 2.5/3.5;
+      background: white;
+      border: 2px dashed #cbd5e1;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    `;
+    
+    slot.innerHTML = `
+      <div style="text-align: center; color: #94a3b8; font-size: 0.9rem;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;">🎴</div>
+        <div>Click to add card</div>
+      </div>
+    `;
+    
+    slot.addEventListener('click', () => {
+      alert('Pokemon card browser coming soon! This would open the card selection interface.');
+    });
+    
+    slot.addEventListener('mouseenter', () => {
+      slot.style.borderColor = '#3b82f6';
+      slot.style.background = '#f0f9ff';
+      slot.style.transform = 'translateY(-2px)';
+    });
+    
+    slot.addEventListener('mouseleave', () => {
+      slot.style.borderColor = '#cbd5e1';
+      slot.style.background = 'white';
+      slot.style.transform = 'translateY(0)';
+    });
+    
+    grid.appendChild(slot);
+  }
 }
+
+function setupModalEventListeners() {
+  // Layout change
+  document.getElementById('pageLayout').addEventListener('change', (e) => {
+    generateGrid(e.target.value);
+    const grid = document.getElementById('cardGrid');
+    const layout = e.target.value;
+    grid.className = \`card-grid grid-\${layout}\`;
+    grid.style.gridTemplateColumns = \`repeat(\${layout === '4x3' ? '4' : layout === '2x4' ? '2' : '3'}, 1fr)\`;
+  });
+
+  // Title change
+  document.getElementById('pageTitle').addEventListener('input', (e) => {
+    document.getElementById('previewTitle').textContent = e.target.value || 'My Pokemon Collection';
+  });
+
+  // Clear all
+  document.getElementById('clearAll').addEventListener('click', () => {
+    if (confirm('Clear all cards?')) {
+      generateGrid(document.getElementById('pageLayout').value);
+    }
+  });
+
+  // Save collection
+  document.getElementById('saveCollection').addEventListener('click', () => {
+    alert('Collection saved! This would save your collection data.');
+  });
+
+  // Add to cart
+  document.getElementById('addToCart').addEventListener('click', () => {
+    alert('Add to cart functionality would redirect to checkout here.');
+  });
+
+  // Browse cards
+  document.getElementById('toggleBrowser').addEventListener('click', () => {
+    openPokemonBrowser();
+  });
+}
+
+// Pokemon Card Browser Modal
+function openPokemonBrowser() {
+  if (document.getElementById('pokemon-browser-modal')) {
+    document.getElementById('pokemon-browser-modal').style.display = 'block';
+    return;
+  }
+  
+  const browserModalHTML = \`
+    <div id="pokemon-browser-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10002; display: flex; align-items: center; justify-content: center;">
+      <div style="background: white; width: 90%; max-width: 800px; height: 80%; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column;">
+        <div style="padding: 1rem; border-bottom: 1px solid #e1e5e9; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin: 0;">Browse Pokemon Cards</h3>
+          <button onclick="closePokemonBrowser()" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Close</button>
+        </div>
+        <div style="flex: 1; overflow: hidden;">
+          <div id="pokemon-browser-content" style="height: 100%; overflow-y: auto;">
+            <!-- Browser content will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </div>
+  \`;
+  
+  document.body.insertAdjacentHTML('beforeend', browserModalHTML);
+  loadPokemonBrowser();
+}
+
+function closePokemonBrowser() {
+  const modal = document.getElementById('pokemon-browser-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+function loadPokemonBrowser() {
+  const content = document.getElementById('pokemon-browser-content');
+  
+  const browserHTML = \`
+    <div class="pokemon-tcg-browser" style="padding: 1rem; height: 100%; display: flex; flex-direction: column;">
+      <div class="browser-search" style="margin-bottom: 1rem;">
+        <input type="text" id="modalCardSearch" placeholder="Search cards..." style="width: 100%; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px;">
+      </div>
+      
+      <div class="browser-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+        <button class="modal-tab-btn active" data-tab="eras" style="flex: 1; padding: 0.75rem; border: 2px solid #e1e5e9; background: #3b82f6; color: white; border-radius: 8px; cursor: pointer;">Eras</button>
+        <button class="modal-tab-btn" data-tab="sets" style="flex: 1; padding: 0.75rem; border: 2px solid #e1e5e9; background: white; border-radius: 8px; cursor: pointer;">Sets</button>
+        <button class="modal-tab-btn" data-tab="cards" style="flex: 1; padding: 0.75rem; border: 2px solid #e1e5e9; background: white; border-radius: 8px; cursor: pointer;">Cards</button>
+      </div>
+      
+      <div class="browser-content" style="flex: 1; overflow-y: auto;">
+        <div id="modalErasTab" class="modal-tab-content active">
+          <div class="eras-grid" style="display: grid; gap: 0.5rem;">
+            <div class="modal-era-item" data-era="vintage" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Vintage (1998-1999)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Original Base Set era</p>
+            </div>
+            <div class="modal-era-item" data-era="neo" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Neo Series (2000-2001)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Neo Genesis, Discovery, Destiny</p>
+            </div>
+            <div class="modal-era-item" data-era="ecard" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">e-Card Series (2002-2003)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Digital integration era</p>
+            </div>
+            <div class="modal-era-item" data-era="ex" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">EX Series (2003-2007)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Pokemon-ex introduction</p>
+            </div>
+            <div class="modal-era-item" data-era="dp" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Diamond & Pearl (2007-2009)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Sinnoh region cards</p>
+            </div>
+            <div class="modal-era-item" data-era="hgss" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">HeartGold SoulSilver (2009-2011)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Johto region return</p>
+            </div>
+            <div class="modal-era-item" data-era="bw" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Black & White (2011-2013)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Unova region cards</p>
+            </div>
+            <div class="modal-era-item" data-era="xy" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">XY Series (2014-2016)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Kalos region and Mega Evolution</p>
+            </div>
+            <div class="modal-era-item" data-era="sm" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Sun & Moon (2017-2019)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Alola region and GX cards</p>
+            </div>
+            <div class="modal-era-item" data-era="swsh" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Sword & Shield (2020-2022)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Galar region and V cards</p>
+            </div>
+            <div class="modal-era-item" data-era="sv" style="padding: 1rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+              <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">Scarlet & Violet (2023+)</h4>
+              <p style="margin: 0; font-size: 0.8rem; color: #6b7280;">Paldea region and current sets</p>
+            </div>
+          </div>
+        </div>
+        
+        <div id="modalSetsTab" class="modal-tab-content" style="display: none;">
+          <div class="modal-sets-loading" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <p>Select an era to view sets</p>
+          </div>
+          <div class="modal-sets-grid" style="display: none; gap: 0.75rem;"></div>
+        </div>
+        
+        <div id="modalCardsTab" class="modal-tab-content" style="display: none;">
+          <div class="modal-cards-loading" style="text-align: center; padding: 2rem; color: #6b7280;">
+            <p>Select a set to view cards</p>
+          </div>
+          <div class="modal-cards-grid" style="display: none; gap: 0.75rem;"></div>
+        </div>
+      </div>
+    </div>
+  \`;
+  
+  content.innerHTML = browserHTML;
+  initModalBrowser();
+}
+
+function initModalBrowser() {
+  const API_KEY = '27cc9548-6ecd-4502-8b2d-267e2ef1bb61';
+  const API_BASE = 'https://api.pokemontcg.io/v2';
+  
+  let currentEra = null;
+  let currentSet = null;
+  let selectedSlot = null;
+  
+  // Era mappings to API queries
+  const eraQueries = {
+    vintage: 'set.series:"Base"',
+    neo: 'set.series:"Neo"',
+    ecard: 'set.series:"E-Card"',
+    ex: 'set.series:"EX"',
+    dp: 'set.series:"Diamond & Pearl"',
+    hgss: 'set.series:"HeartGold & SoulSilver"',
+    bw: 'set.series:"Black & White"',
+    xy: 'set.series:"XY"',
+    sm: 'set.series:"Sun & Moon"',
+    swsh: 'set.series:"Sword & Shield"',
+    sv: 'set.series:"Scarlet & Violet"'
+  };
+  
+  // Tab switching
+  document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const tabName = e.target.dataset.tab;
+      switchModalTab(tabName);
+    });
+  });
+  
+  // Era selection
+  document.querySelectorAll('.modal-era-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      const era = e.currentTarget.dataset.era;
+      selectModalEra(era);
+    });
+    
+    // Hover effects
+    item.addEventListener('mouseenter', (e) => {
+      e.target.style.borderColor = '#3b82f6';
+      e.target.style.background = '#f0f9ff';
+    });
+    
+    item.addEventListener('mouseleave', (e) => {
+      e.target.style.borderColor = '#e1e5e9';
+      e.target.style.background = 'white';
+    });
+  });
+  
+  function switchModalTab(tabName) {
+    // Update tab buttons
+    document.querySelectorAll('.modal-tab-btn').forEach(btn => {
+      if (btn.dataset.tab === tabName) {
+        btn.style.background = '#3b82f6';
+        btn.style.color = 'white';
+        btn.style.borderColor = '#3b82f6';
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = 'black';
+        btn.style.borderColor = '#e1e5e9';
+      }
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.modal-tab-content').forEach(content => {
+      content.style.display = content.id === 'modal' + tabName.charAt(0).toUpperCase() + tabName.slice(1) + 'Tab' ? 'block' : 'none';
+    });
+  }
+  
+  async function selectModalEra(era) {
+    currentEra = era;
+    switchModalTab('sets');
+    
+    const setsGrid = document.querySelector('.modal-sets-grid');
+    const setsLoading = document.querySelector('.modal-sets-loading');
+    
+    setsLoading.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem;"></div>Loading sets...';
+    setsLoading.style.display = 'block';
+    setsGrid.style.display = 'none';
+    
+    try {
+      const query = eraQueries[era];
+      const response = await fetch(\`\${API_BASE}/sets?q=\${encodeURIComponent(query)}\`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      const data = await response.json();
+      displayModalSets(data.data || []);
+    } catch (error) {
+      console.error('Error fetching sets:', error);
+      setsLoading.innerHTML = 'Error loading sets. Please try again.';
+    }
+  }
+  
+  function displayModalSets(sets) {
+    const setsGrid = document.querySelector('.modal-sets-grid');
+    const setsLoading = document.querySelector('.modal-sets-loading');
+    
+    if (sets.length === 0) {
+      setsLoading.innerHTML = 'No sets found for this era.';
+      return;
+    }
+    
+    setsGrid.innerHTML = sets.map(set => \`
+      <div class="modal-set-item" data-set-id="\${set.id}" style="padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer; text-align: center;">
+        <img src="\${set.images?.logo || set.images?.symbol}" alt="\${set.name}" style="width: 40px; height: 40px; margin-bottom: 0.5rem;">
+        <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">\${set.name}</h4>
+        <p style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6b7280;">\${set.releaseDate || 'Unknown date'}</p>
+        <small style="font-size: 0.7rem; color: #9ca3af;">\${set.total || 0} cards</small>
+      </div>
+    \`).join('');
+    
+    setsLoading.style.display = 'none';
+    setsGrid.style.display = 'grid';
+    
+    // Add click listeners to sets
+    document.querySelectorAll('.modal-set-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const setId = e.currentTarget.dataset.setId;
+        selectModalSet(setId);
+      });
+      
+      // Hover effects
+      item.addEventListener('mouseenter', (e) => {
+        e.currentTarget.style.borderColor = '#10b981';
+        e.currentTarget.style.background = '#f0fdf4';
+      });
+      
+      item.addEventListener('mouseleave', (e) => {
+        e.currentTarget.style.borderColor = '#e1e5e9';
+        e.currentTarget.style.background = 'white';
+      });
+    });
+  }
+  
+  async function selectModalSet(setId) {
+    currentSet = setId;
+    switchModalTab('cards');
+    
+    const cardsGrid = document.querySelector('.modal-cards-grid');
+    const cardsLoading = document.querySelector('.modal-cards-loading');
+    
+    cardsLoading.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem;"></div>Loading cards...';
+    cardsLoading.style.display = 'block';
+    cardsGrid.style.display = 'none';
+    
+    try {
+      const response = await fetch(\`\${API_BASE}/cards?q=set.id:\${setId}&pageSize=50\`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      const data = await response.json();
+      displayModalCards(data.data || []);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      cardsLoading.innerHTML = 'Error loading cards. Please try again.';
+    }
+  }
+  
+  function displayModalCards(cards) {
+    const cardsGrid = document.querySelector('.modal-cards-grid');
+    const cardsLoading = document.querySelector('.modal-cards-loading');
+    
+    if (cards.length === 0) {
+      cardsLoading.innerHTML = 'No cards found in this set.';
+      return;
+    }
+    
+    cardsGrid.innerHTML = cards.map(card => \`
+      <div class="modal-card-item" data-card-data='\${JSON.stringify(card)}' style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
+        <img src="\${card.images?.small}" alt="\${card.name}" loading="lazy" style="width: 80px; height: auto; border-radius: 4px; margin-bottom: 0.5rem;">
+        <h5 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; font-weight: 600; text-align: center;">\${card.name}</h5>
+        <small style="font-size: 0.7rem; color: #6b7280;">\${card.number}/\${card.set.total}</small>
+      </div>
+    \`).join('');
+    
+    cardsLoading.style.display = 'none';
+    cardsGrid.style.display = 'grid';
+    
+    // Add click listeners to cards
+    document.querySelectorAll('.modal-card-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const cardData = JSON.parse(e.currentTarget.dataset.cardData);
+        selectModalCard(cardData);
+      });
+      
+      // Hover effects
+      item.addEventListener('mouseenter', (e) => {
+        e.currentTarget.style.borderColor = '#10b981';
+        e.currentTarget.style.background = '#f0fdf4';
+      });
+      
+      item.addEventListener('mouseleave', (e) => {
+        e.currentTarget.style.borderColor = '#e1e5e9';
+        e.currentTarget.style.background = 'white';
+      });
+    });
+  }
+  
+  function selectModalCard(cardData) {
+    alert(\`Selected: \${cardData.name}\\nSet: \${cardData.set.name}\\n\\nThis would now add the card to your collection grid!\`);
+    // Here you would add the card to the selected slot in the grid
+    closePokemonBrowser();
+  }
+}
+
+// Add CSS animation for spinner
+const style = document.createElement('style');
+style.textContent = \`
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+\`;
+document.head.appendChild(style);
 
 // Close modal when clicking outside
-document.getElementById('instructions-modal').addEventListener('click', function(e) {
+document.getElementById('page-builder-modal').addEventListener('click', function(e) {
   if (e.target === this) {
-    closeInstructions();
+    closePageBuilder();
   }
 });
 </script>

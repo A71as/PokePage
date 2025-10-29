@@ -1,3 +1,36 @@
+<style>
+.hero-actions .btn-secondary {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.hero-actions .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+  text-decoration: none;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .hero-actions {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .hero-actions .btn-secondary {
+    margin-left: 0 !important;
+  }
+}
+</style>
+
 <section class="pokepage-hero">
   <div class="hero-container">
     <div class="hero-content">
@@ -10,8 +43,34 @@
           <a href="{{ section.settings.cta_link }}" class="btn-primary">
             {{ section.settings.cta_text }}
           </a>
+          <a href="#card-builder" class="btn-secondary" style="margin-left: 1rem;" onclick="scrollToBuilder(event)">
+            Page Builder
+          </a>
         </div>
       {% endif %}
+      
+      <script>
+      function scrollToBuilder(e) {
+        e.preventDefault();
+        
+        // First try to scroll to the card builder section on the same page
+        const builderSection = document.getElementById('card-builder');
+        if (builderSection) {
+          builderSection.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
+        
+        // If no section found on the page, try to open the modal page builder
+        if (typeof openPageBuilder === 'function') {
+          openPageBuilder('3x3');
+          return;
+        }
+        
+        // Fallback: try the page URLs
+        const possibleUrls = ['/pages/page-builder', '/pages/builder', '/pages/pokemon-page-builder'];
+        window.location.href = possibleUrls[0];
+      }
+      </script>
     </div>
   </div>
 </section>

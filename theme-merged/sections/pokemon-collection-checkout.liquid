@@ -1,0 +1,171 @@
+{{ 'section-pokemon-collection-checkout.css' | asset_url | stylesheet_tag }}
+
+<div class="pokemon-collection-checkout">
+  <div class="checkout-container page-width">
+    <div class="checkout-header">
+      {% if section.settings.title != blank %}
+        <h1 class="checkout-title">{{ section.settings.title }}</h1>
+      {% endif %}
+      {% if section.settings.subtitle != blank %}
+        <p class="checkout-subtitle">{{ section.settings.subtitle }}</p>
+      {% endif %}
+    </div>
+
+    <div class="checkout-content">
+      <!-- Collection Summary -->
+      <div class="collection-summary">
+        <h2>Your Collection Summary</h2>
+        <div id="collectionPreview" class="collection-preview-checkout">
+          <!-- Will be populated by JavaScript -->
+        </div>
+        
+        <div class="collection-info">
+          <div class="info-item">
+            <span class="info-label">Collection Title:</span>
+            <span id="collectionTitle" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Layout:</span>
+            <span id="collectionLayout" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Theme:</span>
+            <span id="collectionTheme" class="info-value">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Total Cards:</span>
+            <span id="totalCards" class="info-value">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pricing Breakdown -->
+      <div class="pricing-breakdown">
+        <h2>Pricing Breakdown</h2>
+        <div class="price-table">
+          <div class="price-row">
+            <span>Base Collection Cost:</span>
+            <span id="basePrice">$0.00</span>
+          </div>
+          <div class="price-row">
+            <span>Cards (<span id="cardCount">0</span> × $2.50):</span>
+            <span id="cardPrice">$0.00</span>
+          </div>
+          <div class="price-row total">
+            <span>Total:</span>
+            <span id="totalPrice">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Information -->
+      <div class="customer-form">
+        <h2>Customer Information</h2>
+        <form id="checkoutForm" class="checkout-form">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="firstName">First Name *</label>
+              <input type="text" id="firstName" name="firstName" required>
+            </div>
+            <div class="form-group">
+              <label for="lastName">Last Name *</label>
+              <input type="text" id="lastName" name="lastName" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="email">Email Address *</label>
+              <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="phone">Phone Number</label>
+              <input type="tel" id="phone" name="phone">
+            </div>
+          </div>
+
+          <h3>Shipping Address</h3>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="address1">Address Line 1 *</label>
+              <input type="text" id="address1" name="address1" required>
+            </div>
+            <div class="form-group full-width">
+              <label for="address2">Address Line 2</label>
+              <input type="text" id="address2" name="address2">
+            </div>
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input type="text" id="city" name="city" required>
+            </div>
+            <div class="form-group">
+              <label for="state">State/Province *</label>
+              <input type="text" id="state" name="state" required>
+            </div>
+            <div class="form-group">
+              <label for="zip">ZIP/Postal Code *</label>
+              <input type="text" id="zip" name="zip" required>
+            </div>
+            <div class="form-group">
+              <label for="country">Country *</label>
+              <select id="country" name="country" required>
+                <option value="">Select Country</option>
+                <option value="US">United States</option>
+                <option value="CA">Canada</option>
+                <option value="GB">United Kingdom</option>
+                <option value="AU">Australia</option>
+                <option value="DE">Germany</option>
+                <option value="FR">France</option>
+                <option value="JP">Japan</option>
+                <!-- Add more countries as needed -->
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="specialInstructions">Special Instructions</label>
+            <textarea id="specialInstructions" name="specialInstructions" rows="3" placeholder="Any special requests for your collection..."></textarea>
+          </div>
+
+          <div class="checkout-actions">
+            <button type="button" class="btn-secondary" onclick="history.back()">Back to Builder</button>
+            <button type="submit" class="btn-primary checkout-submit">
+              Complete Order - <span id="finalPrice">$0.00</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="{{ 'pokemon-collection-checkout.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Collection Checkout",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "Complete Your Collection Order"
+    },
+    {
+      "type": "textarea",
+      "id": "subtitle",
+      "label": "Subtitle",
+      "default": "Review your custom Pokemon collection and complete your purchase"
+    },
+    {
+      "type": "text",
+      "id": "success_page",
+      "label": "Success Page URL",
+      "default": "/pages/order-confirmation",
+      "info": "Page to redirect to after successful order"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Checkout"
+    }
+  ]
+}
+{% endschema %}

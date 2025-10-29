@@ -1,0 +1,15 @@
+{
+  "name": "Pokemon Page Builder",
+  "sections": {
+    "main": {
+      "type": "pokemon-page-builder",
+      "settings": {
+        "title": "Create Your Pokemon Collection Page",
+        "subtitle": "Build custom Pokemon card collection pages with our interactive builder",
+        "show_pricing": true,
+        "enable_preview": true
+      }
+    }
+  },
+  "order": ["main"]
+}
