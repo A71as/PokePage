@@ -463,6 +463,8 @@ function generateGrid(layout) {
     \`;
     
     slot.addEventListener('click', () => {
+      console.log(\`Slot \${i + 1} clicked\`);
+      
       // First, remove selection from all slots
       document.querySelectorAll('.grid-slot').forEach(s => {
         s.classList.remove('selected');
@@ -472,12 +474,31 @@ function generateGrid(layout) {
       // Select this slot
       slot.classList.add('selected');
       slot.style.borderColor = '#3b82f6';
+      slot.style.borderWidth = '3px';
       selectedSlot = \`slot-\${i}\`;
       
       console.log('Selected slot:', selectedSlot);
       
-      // Show message and open Pokemon browser
-      alert(\`Slot \${i + 1} selected! Now click "Browse Pokemon Cards" to choose a card for this slot.\`);
+      // Update slot content to show it's selected
+      slot.innerHTML = \`
+        <div style="text-align: center; color: #3b82f6; font-size: 0.9rem;">
+          <div style="font-size: 2rem; margin-bottom: 0.5rem;">✅</div>
+          <div><strong>Slot \${i + 1} Selected</strong></div>
+          <div style="font-size: 0.8rem; margin-top: 0.25rem;">Click "Browse Pokemon Cards"</div>
+        </div>
+      \`;
+      
+      // Show temporary message
+      setTimeout(() => {
+        if (slot.classList.contains('selected') && !slot.classList.contains('filled')) {
+          slot.innerHTML = \`
+            <div style="text-align: center; color: #3b82f6; font-size: 0.9rem;">
+              <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.8;">🎯</div>
+              <div>Selected Slot \${i + 1}</div>
+            </div>
+          \`;
+        }
+      }, 2000);
     });
     
     slot.addEventListener('mouseenter', () => {
@@ -528,18 +549,45 @@ function setupModalEventListeners() {
     alert('Add to cart functionality would redirect to checkout here.');
   });
 
-  // Browse cards
-  document.getElementById('toggleBrowser').addEventListener('click', () => {
-    openPokemonBrowser();
-  });
+  // Browse cards - CRITICAL for Pokemon card selection
+  const browserBtn = document.getElementById('toggleBrowser');
+  if (browserBtn) {
+    console.log('Found Browse Pokemon Cards button, adding event listener...');
+    browserBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('Browse Pokemon Cards button clicked!');
+      
+      // Check if user has selected a slot first
+      if (!selectedSlot) {
+        alert('Please select a grid slot first by clicking on one of the card slots in your collection grid.');
+        return;
+      }
+      
+      openPokemonBrowser();
+    });
+    console.log('Browse button listener added successfully');
+  } else {
+    console.error('Browse Pokemon Cards button not found!');
+    
+    // Debug: Let's see what elements we do have
+    console.log('Available elements with IDs:', 
+      Array.from(document.querySelectorAll('[id]')).map(el => el.id)
+    );
+  }
 }
 
 // Pokemon Card Browser Modal
 function openPokemonBrowser() {
-  if (document.getElementById('pokemon-browser-modal')) {
-    document.getElementById('pokemon-browser-modal').style.display = 'block';
+  console.log('openPokemonBrowser called');
+  
+  const existingModal = document.getElementById('pokemon-browser-modal');
+  if (existingModal) {
+    console.log('Found existing modal, showing it');
+    existingModal.style.display = 'block';
     return;
   }
+  
+  console.log('Creating new Pokemon browser modal');
   
   const browserModalHTML = \`
     <div id="pokemon-browser-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10002; display: flex; align-items: center; justify-content: center;">
