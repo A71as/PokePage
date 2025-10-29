@@ -438,9 +438,10 @@ function generateGrid(layout) {
   
   for (let i = 0; i < totalSlots; i++) {
     const slot = document.createElement('div');
-    slot.className = 'card-slot';
+    slot.className = 'card-slot grid-slot';
     slot.dataset.slotIndex = i;
-    slot.style.cssText = `
+    slot.dataset.slot = \`slot-\${i}\`;
+    slot.style.cssText = \`
       aspect-ratio: 2.5/3.5;
       background: white;
       border: 2px dashed #cbd5e1;
@@ -451,17 +452,32 @@ function generateGrid(layout) {
       justify-content: center;
       cursor: pointer;
       transition: all 0.3s ease;
-    `;
+      position: relative;
+    \`;
     
-    slot.innerHTML = `
+    slot.innerHTML = \`
       <div style="text-align: center; color: #94a3b8; font-size: 0.9rem;">
         <div style="font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;">🎴</div>
-        <div>Click to add card</div>
+        <div>Click to select slot</div>
       </div>
-    `;
+    \`;
     
     slot.addEventListener('click', () => {
-      alert('Pokemon card browser coming soon! This would open the card selection interface.');
+      // First, remove selection from all slots
+      document.querySelectorAll('.grid-slot').forEach(s => {
+        s.classList.remove('selected');
+        s.style.borderColor = '#cbd5e1';
+      });
+      
+      // Select this slot
+      slot.classList.add('selected');
+      slot.style.borderColor = '#3b82f6';
+      selectedSlot = \`slot-\${i}\`;
+      
+      console.log('Selected slot:', selectedSlot);
+      
+      // Show message and open Pokemon browser
+      alert(\`Slot \${i + 1} selected! Now click "Browse Pokemon Cards" to choose a card for this slot.\`);
     });
     
     slot.addEventListener('mouseenter', () => {
@@ -646,19 +662,90 @@ function initModalBrowser() {
   let currentSet = null;
   let selectedSlot = null;
   
-  // Era mappings to API queries - Simplified without quotes
-  const eraQueries = {
-    vintage: 'series:Base',
-    neo: 'name:Neo*',
-    ecard: 'name:*Card*',
-    ex: 'name:*EX* OR series:EX*',
-    dp: 'name:*Diamond* OR name:*Pearl* OR name:*Platinum*',
-    hgss: 'name:*HeartGold* OR name:*SoulSilver* OR name:*Call*',
-    bw: 'name:*Black* OR name:*White* OR name:*Plasma*',
-    xy: 'series:XY OR name:XY*',
-    sm: 'name:*Sun* OR name:*Moon* OR series:*Sun*',
-    swsh: 'name:*Sword* OR name:*Shield* OR name:*Battle* OR name:*Rebel*',
-    sv: 'name:*Scarlet* OR name:*Violet* OR name:*Paldea*'
+  // Hardcoded set IDs for each era - much more reliable
+  const eraSetIds = {
+    vintage: [
+      { id: 'base1', name: 'Base Set', description: 'The original Pokemon TCG set' },
+      { id: 'base2', name: 'Jungle', description: 'Second set in the Base series' },
+      { id: 'base3', name: 'Fossil', description: 'Third set featuring Fossil Pokemon' },
+      { id: 'base4', name: 'Base Set 2', description: 'Reprint compilation set' },
+      { id: 'base5', name: 'Team Rocket', description: 'First villain-themed set' },
+      { id: 'gym1', name: 'Gym Heroes', description: 'Gym Leader Pokemon' },
+      { id: 'gym2', name: 'Gym Challenge', description: 'More Gym Leader Pokemon' }
+    ],
+    neo: [
+      { id: 'neo1', name: 'Neo Genesis', description: 'Introduction to Johto region' },
+      { id: 'neo2', name: 'Neo Discovery', description: 'More Johto Pokemon' },
+      { id: 'neo3', name: 'Neo Destiny', description: 'Light and Dark Pokemon' },
+      { id: 'neo4', name: 'Neo Revelation', description: 'Legendary Pokemon focus' }
+    ],
+    ecard: [
+      { id: 'ecard1', name: 'Expedition Base Set', description: 'First e-Card series' },
+      { id: 'ecard2', name: 'Aquapolis', description: 'Water-themed e-Card set' },
+      { id: 'ecard3', name: 'Skyridge', description: 'Final e-Card series set' }
+    ],
+    ex: [
+      { id: 'ex1', name: 'Ruby & Sapphire', description: 'Hoenn region debut' },
+      { id: 'ex2', name: 'Sandstorm', description: 'Desert-themed EX set' },
+      { id: 'ex3', name: 'Dragon', description: 'Dragon-type introduction' },
+      { id: 'ex4', name: 'Team Magma vs Team Aqua', description: 'Villain teams clash' },
+      { id: 'ex5', name: 'Hidden Legends', description: 'Legendary Pokemon focus' },
+      { id: 'ex6', name: 'FireRed & LeafGreen', description: 'Kanto region return' }
+    ],
+    dp: [
+      { id: 'dp1', name: 'Diamond & Pearl', description: 'Sinnoh region introduction' },
+      { id: 'dp2', name: 'Mysterious Treasures', description: 'Sinnoh Pokemon expansion' },
+      { id: 'dp3', name: 'Secret Wonders', description: 'More Sinnoh discoveries' },
+      { id: 'dp4', name: 'Great Encounters', description: 'Legendary encounters' },
+      { id: 'dp5', name: 'Majestic Dawn', description: 'Dawn-themed set' },
+      { id: 'dp6', name: 'Legends Awakened', description: 'Legendary Pokemon awaken' }
+    ],
+    hgss: [
+      { id: 'hgss1', name: 'HeartGold & SoulSilver', description: 'Johto region return' },
+      { id: 'hgss2', name: 'Unleashed', description: 'Pokemon power unleashed' },
+      { id: 'hgss3', name: 'Undaunted', description: 'Fearless Pokemon battles' },
+      { id: 'hgss4', name: 'Triumphant', description: 'Victory celebration set' },
+      { id: 'col1', name: 'Call of Legends', description: 'Legendary Pokemon call' }
+    ],
+    bw: [
+      { id: 'bw1', name: 'Black & White', description: 'Unova region debut' },
+      { id: 'bw2', name: 'Emerging Powers', description: 'New powers emerge' },
+      { id: 'bw3', name: 'Noble Victories', description: 'Noble Pokemon victories' },
+      { id: 'bw4', name: 'Next Destinies', description: 'Destiny awaits' },
+      { id: 'bw5', name: 'Dark Explorers', description: 'Dark Pokemon exploration' },
+      { id: 'bw6', name: 'Dragons Exalted', description: 'Dragon Pokemon exalted' }
+    ],
+    xy: [
+      { id: 'xy1', name: 'XY Base Set', description: 'Kalos region introduction' },
+      { id: 'xy2', name: 'Flashfire', description: 'Fire-type focus' },
+      { id: 'xy3', name: 'Furious Fists', description: 'Fighting-type emphasis' },
+      { id: 'xy4', name: 'Phantom Forces', description: 'Ghostly Pokemon forces' },
+      { id: 'xy5', name: 'Primal Clash', description: 'Primal Pokemon clash' },
+      { id: 'xy6', name: 'Roaring Skies', description: 'Sky-high Pokemon battles' }
+    ],
+    sm: [
+      { id: 'sm1', name: 'Sun & Moon Base Set', description: 'Alola region debut' },
+      { id: 'sm2', name: 'Guardians Rising', description: 'Guardian Pokemon rise' },
+      { id: 'sm3', name: 'Burning Shadows', description: 'Shadow Pokemon burn' },
+      { id: 'sm4', name: 'Crimson Invasion', description: 'Crimson forces invade' },
+      { id: 'sm5', name: 'Ultra Prism', description: 'Ultra Necrozma focus' },
+      { id: 'sm6', name: 'Forbidden Light', description: 'Forbidden Pokemon light' }
+    ],
+    swsh: [
+      { id: 'swsh1', name: 'Sword & Shield Base Set', description: 'Galar region introduction' },
+      { id: 'swsh2', name: 'Rebel Clash', description: 'Rebellious Pokemon clash' },
+      { id: 'swsh3', name: 'Darkness Ablaze', description: 'Dark flames ablaze' },
+      { id: 'swsh4', name: 'Vivid Voltage', description: 'Electric energy surge' },
+      { id: 'swsh5', name: 'Battle Styles', description: 'Different battle approaches' },
+      { id: 'swsh6', name: 'Chilling Reign', description: 'Ice-cold Pokemon reign' }
+    ],
+    sv: [
+      { id: 'sv1', name: 'Scarlet & Violet Base Set', description: 'Paldea region debut' },
+      { id: 'sv2', name: 'Paldea Evolved', description: 'Paldean Pokemon evolution' },
+      { id: 'sv3', name: 'Obsidian Flames', description: 'Obsidian fire burns' },
+      { id: 'sv4', name: '151', description: 'Original 151 Pokemon celebration' },
+      { id: 'sv5', name: 'Temporal Forces', description: 'Time-based Pokemon forces' }
+    ]
   };
   
   // Tab switching
@@ -720,35 +807,22 @@ function initModalBrowser() {
     setsGrid.style.display = 'none';
     
     try {
-      console.log('Fetching all sets and filtering for era:', era);
+      console.log('Loading hardcoded sets for era:', era);
       
-      // Fetch all sets and filter client-side for better reliability
-      const response = await fetch(\`\${API_BASE}/sets?pageSize=50\`, {
-        headers: { 'X-Api-Key': API_KEY }
-      });
+      // Get hardcoded sets for this era
+      const eraSets = eraSetIds[era] || [];
+      console.log('Found', eraSets.length, 'hardcoded sets for era:', era);
       
-      if (!response.ok) {
-        throw new Error(\`HTTP error! status: \${response.status}\`);
+      if (eraSets.length === 0) {
+        setsLoading.innerHTML = 'No sets available for this era yet.';
+        return;
       }
       
-      const data = await response.json();
-      console.log('Fetched', data.data?.length || 0, 'total sets');
-      console.log('API Response:', data);
+      // Display the hardcoded sets immediately
+      displayModalSetsFromHardcoded(eraSets);
       
-      // Temporary: show first 10 sets for any era to test display
-      if (era === 'vintage') {
-        // Filter sets client-side based on era characteristics
-        const sets = filterSetsByEra(data.data || [], era);
-        console.log('Filtered to', sets.length, 'sets for era:', era);
-        displayModalSets(sets);
-      } else {
-        // For testing: show first 5 sets regardless of era
-        console.log('Testing: showing first 5 sets for era:', era);
-        const testSets = (data.data || []).slice(0, 5);
-        displayModalSets(testSets);
-      }
     } catch (error) {
-      console.error('Error fetching sets:', error);
+      console.error('Error loading sets:', error);
       setsLoading.innerHTML = \`Error loading sets: \${error.message}. Please try again.\`;
     }
   }
@@ -911,6 +985,47 @@ function initModalBrowser() {
       .slice(0, 15); // Limit to 15 sets per era
   }
   
+  function displayModalSetsFromHardcoded(eraSets) {
+    const setsGrid = document.querySelector('.modal-sets-grid');
+    const setsLoading = document.querySelector('.modal-sets-loading');
+    
+    console.log('Displaying hardcoded sets:', eraSets);
+    
+    setsGrid.innerHTML = eraSets.map(set => \`
+      <div class="modal-set-item" data-set-id="\${set.id}" style="padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer; text-align: center;">
+        <div style="width: 40px; height: 40px; margin: 0 auto 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 0.8rem;">
+          \${set.name.substring(0, 2).toUpperCase()}
+        </div>
+        <h4 style="margin: 0 0 0.25rem 0; font-size: 0.9rem;">\${set.name}</h4>
+        <p style="margin: 0 0 0.25rem 0; font-size: 0.8rem; color: #6b7280;">\${set.description}</p>
+        <small style="font-size: 0.7rem; color: #9ca3af;">Click to view cards</small>
+      </div>
+    \`).join('');
+    
+    setsLoading.style.display = 'none';
+    setsGrid.style.display = 'grid';
+    
+    // Add click listeners to sets
+    document.querySelectorAll('.modal-set-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        const setId = e.currentTarget.dataset.setId;
+        console.log('Selected set:', setId);
+        selectModalSet(setId);
+      });
+      
+      // Hover effects
+      item.addEventListener('mouseenter', (e) => {
+        e.currentTarget.style.borderColor = '#10b981';
+        e.currentTarget.style.background = '#f0fdf4';
+      });
+      
+      item.addEventListener('mouseleave', (e) => {
+        e.currentTarget.style.borderColor = '#e1e5e9';
+        e.currentTarget.style.background = 'white';
+      });
+    });
+  }
+  
   function displayModalSets(sets) {
     const setsGrid = document.querySelector('.modal-sets-grid');
     const setsLoading = document.querySelector('.modal-sets-loading');
@@ -1017,8 +1132,38 @@ function initModalBrowser() {
   }
   
   function selectModalCard(cardData) {
-    alert(\`Selected: \${cardData.name}\\nSet: \${cardData.set.name}\\n\\nThis would now add the card to your collection grid!\`);
-    // Here you would add the card to the selected slot in the grid
+    console.log('Selected card:', cardData);
+    
+    // Check if we have a selected slot
+    if (!selectedSlot) {
+      alert('Please select a grid slot first, then choose a card to add to it.');
+      return;
+    }
+    
+    // Add the card to the selected slot
+    const slotElement = document.querySelector(\`[data-slot="\${selectedSlot}"]\`);
+    if (slotElement) {
+      // Update the slot with the card image and data
+      slotElement.innerHTML = \`
+        <img src="\${cardData.images?.small || cardData.images?.large}" alt="\${cardData.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+        <div style="position: absolute; bottom: 4px; left: 4px; right: 4px; background: rgba(0,0,0,0.8); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.7rem; text-align: center;">
+          \${cardData.name}
+        </div>
+      \`;
+      
+      // Store card data on the element
+      slotElement.dataset.cardData = JSON.stringify(cardData);
+      slotElement.classList.add('filled');
+      
+      // Clear selected slot
+      document.querySelectorAll('.grid-slot').forEach(slot => {
+        slot.classList.remove('selected');
+      });
+      selectedSlot = null;
+      
+      alert(\`Added \${cardData.name} to your collection!\`);
+    }
+    
     closePokemonBrowser();
   }
 }
