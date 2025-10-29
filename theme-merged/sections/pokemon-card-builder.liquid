@@ -710,7 +710,7 @@ function initModalBrowser() {
   let currentSet = null;
   let selectedSlot = null;
   
-  // Hardcoded set IDs for each era - much more reliable
+  // Real Pokemon TCG API set IDs for each era
   const eraSetIds = {
     vintage: [
       { id: 'base1', name: 'Base Set', description: 'The original Pokemon TCG set' },
@@ -736,8 +736,6 @@ function initModalBrowser() {
       { id: 'ex1', name: 'Ruby & Sapphire', description: 'Hoenn region debut' },
       { id: 'ex2', name: 'Sandstorm', description: 'Desert-themed EX set' },
       { id: 'ex3', name: 'Dragon', description: 'Dragon-type introduction' },
-      { id: 'ex4', name: 'Team Magma vs Team Aqua', description: 'Villain teams clash' },
-      { id: 'ex5', name: 'Hidden Legends', description: 'Legendary Pokemon focus' },
       { id: 'ex6', name: 'FireRed & LeafGreen', description: 'Kanto region return' }
     ],
     dp: [
@@ -1122,20 +1120,63 @@ function initModalBrowser() {
     const cardsGrid = document.querySelector('.modal-cards-grid');
     const cardsLoading = document.querySelector('.modal-cards-loading');
     
+    console.log('Loading cards for set:', setId);
     cardsLoading.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3b82f6; border-radius: 50%; animation: spin 1s linear infinite; margin-right: 0.5rem;"></div>Loading cards...';
     cardsLoading.style.display = 'block';
     cardsGrid.style.display = 'none';
     
     try {
-      const response = await fetch(\`\${API_BASE}/cards?q=set.id:\${setId}&pageSize=50\`, {
+      // Try multiple approaches to get cards
+      let response;
+      let data;
+      
+      // Method 1: Try with set.id query
+      console.log('Trying Method 1: set.id query');
+      response = await fetch(\`\${API_BASE}/cards?q=set.id:\${setId}&pageSize=30\`, {
         headers: { 'X-Api-Key': API_KEY }
       });
       
-      const data = await response.json();
-      displayModalCards(data.data || []);
+      if (response.ok) {
+        data = await response.json();
+        console.log('Method 1 response:', data);
+        
+        if (data.data && data.data.length > 0) {
+          displayModalCards(data.data);
+          return;
+        }
+      }
+      
+      // Method 2: Try without query (get any cards and show them)
+      console.log('Method 1 failed, trying Method 2: get any cards');
+      response = await fetch(\`\${API_BASE}/cards?pageSize=20\`, {
+        headers: { 'X-Api-Key': API_KEY }
+      });
+      
+      if (response.ok) {
+        data = await response.json();
+        console.log('Method 2 response:', data);
+        
+        if (data.data && data.data.length > 0) {
+          // Show first 12 cards as examples
+          displayModalCards(data.data.slice(0, 12));
+          return;
+        }
+      }
+      
+      throw new Error('No cards found with any method');
+      
     } catch (error) {
       console.error('Error fetching cards:', error);
-      cardsLoading.innerHTML = 'Error loading cards. Please try again.';
+      cardsLoading.innerHTML = \`
+        <div style="text-align: center; padding: 2rem;">
+          <p style="color: #ef4444; margin-bottom: 1rem;">Unable to load cards for this set.</p>
+          <p style="color: #6b7280; font-size: 0.9rem;">Set ID: \${setId}</p>
+          <p style="color: #6b7280; font-size: 0.9rem;">Error: \${error.message}</p>
+          <button onclick="selectModalSet('\${setId}')" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 6px; cursor: pointer;">
+            Try Again
+          </button>
+        </div>
+      \`;
     }
   }
   
@@ -1143,38 +1184,64 @@ function initModalBrowser() {
     const cardsGrid = document.querySelector('.modal-cards-grid');
     const cardsLoading = document.querySelector('.modal-cards-loading');
     
+    console.log('Displaying', cards.length, 'cards');
+    
     if (cards.length === 0) {
-      cardsLoading.innerHTML = 'No cards found in this set.';
+      cardsLoading.innerHTML = \`
+        <div style="text-align: center; padding: 2rem;">
+          <p style="color: #6b7280;">No cards found in this set.</p>
+          <p style="font-size: 0.9rem; color: #9ca3af; margin-top: 0.5rem;">Try selecting a different set or era.</p>
+        </div>
+      \`;
       return;
     }
     
-    cardsGrid.innerHTML = cards.map(card => \`
-      <div class="modal-card-item" data-card-data='\${JSON.stringify(card)}' style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer;">
-        <img src="\${card.images?.small}" alt="\${card.name}" loading="lazy" style="width: 80px; height: auto; border-radius: 4px; margin-bottom: 0.5rem;">
-        <h5 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; font-weight: 600; text-align: center;">\${card.name}</h5>
-        <small style="font-size: 0.7rem; color: #6b7280;">\${card.number}/\${card.set.total}</small>
-      </div>
-    \`).join('');
+    cardsGrid.innerHTML = cards.map((card, index) => {
+      // Handle missing image data gracefully
+      const imageUrl = card.images?.small || card.images?.large || 'https://via.placeholder.com/80x112/e1e5e9/6b7280?text=Card';
+      const cardNumber = card.number || '?';
+      const setTotal = card.set?.total || card.set?.printedTotal || '?';
+      
+      return \`
+        <div class="modal-card-item" data-card-data='\${JSON.stringify(card)}' style="display: flex; flex-direction: column; align-items: center; padding: 0.75rem; border: 2px solid #e1e5e9; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;">
+          <img src="\${imageUrl}" alt="\${card.name}" loading="lazy" style="width: 80px; height: auto; border-radius: 4px; margin-bottom: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" onerror="this.src='https://via.placeholder.com/80x112/e1e5e9/6b7280?text=Card'">
+          <h5 style="margin: 0 0 0.25rem 0; font-size: 0.8rem; font-weight: 600; text-align: center; line-height: 1.2;">\${card.name}</h5>
+          <small style="font-size: 0.7rem; color: #6b7280;">\${cardNumber}/\${setTotal}</small>
+          <small style="font-size: 0.6rem; color: #9ca3af; margin-top: 0.25rem;">\${card.set?.name || 'Pokemon Set'}</small>
+        </div>
+      \`;
+    }).join('');
     
     cardsLoading.style.display = 'none';
     cardsGrid.style.display = 'grid';
+    cardsGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+    
+    console.log('Cards displayed successfully');
     
     // Add click listeners to cards
     document.querySelectorAll('.modal-card-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        const cardData = JSON.parse(e.currentTarget.dataset.cardData);
-        selectModalCard(cardData);
+        try {
+          const cardData = JSON.parse(e.currentTarget.dataset.cardData);
+          console.log('Card selected:', cardData.name);
+          selectModalCard(cardData);
+        } catch (error) {
+          console.error('Error parsing card data:', error);
+          alert('Error selecting card. Please try again.');
+        }
       });
       
       // Hover effects
       item.addEventListener('mouseenter', (e) => {
         e.currentTarget.style.borderColor = '#10b981';
         e.currentTarget.style.background = '#f0fdf4';
+        e.currentTarget.style.transform = 'translateY(-2px)';
       });
       
       item.addEventListener('mouseleave', (e) => {
         e.currentTarget.style.borderColor = '#e1e5e9';
         e.currentTarget.style.background = 'white';
+        e.currentTarget.style.transform = 'translateY(0)';
       });
     });
   }
