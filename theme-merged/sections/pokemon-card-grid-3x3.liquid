@@ -1,0 +1,283 @@
+{% comment %}
+  Pokemon Card Grid 3x3 Section
+  Allows users to create a 3x3 grid of Pokemon cards with product links
+{% endcomment %}
+
+<style>
+  .pokemon-grid-3x3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-4, 1rem);
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-6, 2rem);
+  }
+  
+  .pokemon-card-slot {
+    aspect-ratio: 3/4;
+    border: 2px dashed #e5e7eb;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: #f9fafb;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pokemon-card-slot:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+  
+  .pokemon-card-slot.has-card {
+    border-style: solid;
+    border-color: #10b981;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+  
+  .pokemon-card-image {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+  
+  .pokemon-card-info {
+    padding: 8px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .pokemon-card-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 4px;
+    color: #1f2937;
+  }
+  
+  .pokemon-card-price {
+    font-size: 0.75rem;
+    color: #10b981;
+    font-weight: 500;
+  }
+  
+  .buy-card-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .pokemon-card-slot:hover .buy-card-btn {
+    opacity: 1;
+  }
+  
+  .empty-slot-content {
+    text-align: center;
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
+  
+  .grid-title {
+    text-align: center;
+    margin-bottom: var(--spacing-6, 2rem);
+  }
+  
+  .grid-title h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .grid-title p {
+    color: #6b7280;
+    font-size: 1.125rem;
+  }
+  
+  @media (max-width: 768px) {
+    .pokemon-grid-3x3 {
+      gap: var(--spacing-2, 0.5rem);
+      padding: var(--spacing-4, 1rem);
+      max-width: 100%;
+    }
+  }
+</style>
+
+<div class="pokemon-card-section">
+  {% if section.settings.show_title %}
+    <div class="grid-title">
+      <h2>{{ section.settings.title | default: '3x3 Pokemon Collection' }}</h2>
+      {% if section.settings.description != blank %}
+        <p>{{ section.settings.description }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+  
+  <div class="pokemon-grid-3x3">
+    {% for i in (1..9) %}
+      {% assign card_product_key = 'card_' | append: i %}
+      {% assign card_product = section.settings[card_product_key] %}
+      
+      <div class="pokemon-card-slot {% if card_product != blank %}has-card{% endif %}">
+        {% if card_product != blank %}
+          {% assign product = all_products[card_product] %}
+          {% if product != blank %}
+            <img src="{{ product.featured_image | image_url: width: 200 }}" 
+                 alt="{{ product.title }}" 
+                 class="pokemon-card-image">
+            <div class="pokemon-card-info">
+              <div class="pokemon-card-name">{{ product.title | truncate: 20 }}</div>
+              <div class="pokemon-card-price">{{ product.price | money }}</div>
+            </div>
+            <button class="buy-card-btn" onclick="addToCart('{{ product.variants.first.id }}')">
+              Buy
+            </button>
+          {% else %}
+            <div class="empty-slot-content">
+              <div>Card {{ i }}</div>
+              <small>Product not found</small>
+            </div>
+          {% endif %}
+        {% else %}
+          <div class="empty-slot-content">
+            <div>Empty Slot {{ i }}</div>
+            <small>Add a card</small>
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+  
+  {% if section.settings.show_buy_all %}
+    <div style="text-align: center; margin-top: 2rem;">
+      <button class="btn btn-primary" style="background: var(--color-primary, #3b82f6); color: white; padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+        Buy Complete Collection - {{ section.settings.collection_price | default: '$99.99' }}
+      </button>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+function addToCart(variantId) {
+  fetch('/cart/add.js', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      items: [{
+        id: variantId,
+        quantity: 1
+      }]
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+    // Show success message or update cart
+    alert('Card added to cart!');
+  })
+  .catch(error => {
+    console.error('Error:', error);
+  });
+}
+</script>
+
+{% schema %}
+{
+  "name": "Pokemon Card Grid 3x3",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_title",
+      "label": "Show title",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title",
+      "default": "3x3 Pokemon Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "product",
+      "id": "card_1",
+      "label": "Card 1 (Top Left)"
+    },
+    {
+      "type": "product",
+      "id": "card_2",
+      "label": "Card 2 (Top Center)"
+    },
+    {
+      "type": "product",
+      "id": "card_3",
+      "label": "Card 3 (Top Right)"
+    },
+    {
+      "type": "product",
+      "id": "card_4",
+      "label": "Card 4 (Middle Left)"
+    },
+    {
+      "type": "product",
+      "id": "card_5",
+      "label": "Card 5 (Middle Center)"
+    },
+    {
+      "type": "product",
+      "id": "card_6",
+      "label": "Card 6 (Middle Right)"
+    },
+    {
+      "type": "product",
+      "id": "card_7",
+      "label": "Card 7 (Bottom Left)"
+    },
+    {
+      "type": "product",
+      "id": "card_8",
+      "label": "Card 8 (Bottom Center)"
+    },
+    {
+      "type": "product",
+      "id": "card_9",
+      "label": "Card 9 (Bottom Right)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_buy_all",
+      "label": "Show 'Buy All' button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "collection_price",
+      "label": "Collection Price",
+      "default": "$99.99"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pokemon Card Grid 3x3"
+    }
+  ]
+}
+{% endschema %}

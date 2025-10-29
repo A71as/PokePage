@@ -1,0 +1,46 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": [
+        {
+          "type": "title",
+          "settings": {}
+        },
+        {
+          "type": "price",
+          "settings": {}
+        },
+        {
+          "type": "variant_picker",
+          "settings": {}
+        },
+        {
+          "type": "buy_buttons",
+          "settings": {}
+        },
+        {
+          "type": "description",
+          "settings": {}
+        },
+        {
+          "type": "custom_liquid",
+          "settings": {
+            "custom_liquid": "<div class=\"pokemon-card-details\" style=\"margin-top: 2rem; padding: 1.5rem; background: #f9fafb; border-radius: 12px;\">\n  <h3 style=\"font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #1f2937;\">Card Details</h3>\n  {% if product.metafields.custom.card_rarity %}\n    <p><strong>Rarity:</strong> {{ product.metafields.custom.card_rarity }}</p>\n  {% endif %}\n  {% if product.metafields.custom.card_condition %}\n    <p><strong>Condition:</strong> {{ product.metafields.custom.card_condition }}</p>\n  {% endif %}\n  {% if product.metafields.custom.card_set %}\n    <p><strong>Set:</strong> {{ product.metafields.custom.card_set }}</p>\n  {% endif %}\n  {% if product.metafields.custom.card_number %}\n    <p><strong>Card Number:</strong> {{ product.metafields.custom.card_number }}</p>\n  {% endif %}\n</div>"
+          }
+        }
+      ]
+    },
+    "related-products": {
+      "type": "related-products",
+      "settings": {
+        "heading": "More Pokemon Cards",
+        "products_to_show": 8
+      }
+    }
+  },
+  "order": [
+    "main",
+    "related-products"
+  ]
+}

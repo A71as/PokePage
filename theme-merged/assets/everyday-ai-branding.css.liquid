@@ -40,6 +40,47 @@
     transform: translateY(-2px);
 }
 
+/* Pokemon Card Builder Enhancements */
+.pokemon-card-builder {
+    --pokemon-blue: #3b82f6;
+    --pokemon-green: #10b981;
+    --pokemon-purple: #8b5cf6;
+    --pokemon-yellow: #f59e0b;
+    --card-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    --card-shadow-hover: 0 8px 32px rgba(0,0,0,0.15);
+}
+
+.pokemon-card-slot,
+.pokemon-card-slot-4x3 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.pokemon-card-slot:hover,
+.pokemon-card-slot-4x3:hover {
+    transform: scale(1.02);
+}
+
+.pokemon-card-slot.has-card:hover,
+.pokemon-card-slot-4x3.has-card:hover {
+    transform: scale(1.05) translateY(-4px);
+    box-shadow: var(--card-shadow-hover);
+}
+
+/* Enhanced card previews with Pokemon-themed colors */
+.preview-card:nth-child(1) { background: var(--pokemon-blue); }
+.preview-card:nth-child(2) { background: var(--pokemon-green); }
+.preview-card:nth-child(3) { background: var(--pokemon-purple); }
+.preview-card:nth-child(4) { background: var(--pokemon-yellow); }
+.preview-card:nth-child(5) { background: var(--pokemon-blue); }
+.preview-card:nth-child(6) { background: var(--pokemon-green); }
+.preview-card:nth-child(7) { background: var(--pokemon-purple); }
+.preview-card:nth-child(8) { background: var(--pokemon-yellow); }
+.preview-card:nth-child(9) { background: var(--pokemon-blue); }
+.preview-card:nth-child(10) { background: var(--pokemon-green); }
+.preview-card:nth-child(11) { background: var(--pokemon-purple); }
+.preview-card:nth-child(12) { background: var(--pokemon-yellow); }
+
 /* Base surface and typography */
 .site-wrapper {
     background: var(--background);

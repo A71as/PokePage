@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "pokemon-grid": {
+      "type": "pokemon-card-grid-3x3",
+      "settings": {
+        "show_title": true,
+        "title": "Pokemon Collection",
+        "description": "Choose individual cards or buy the complete set",
+        "show_buy_all": true,
+        "collection_price": "$99.99"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "pokemon-grid"
+  ]
+}

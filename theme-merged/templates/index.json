@@ -4,11 +4,19 @@
       "type": "pokepage-hero",
       "settings": {
         "title": "PokePage",
-        "subtitle": "WITH AHMED ALAMI",
-        "description": "Free Monthly Town Hall • Newark, NJ & Online",
+        "subtitle": "POKEMON CARD COLLECTIONS",
+        "description": "Create custom card collection pages • Buy individual cards or complete sets",
         "show_cta": true,
-        "cta_text": "Join Our Community",
-        "cta_link": "#newsletter-signup"
+        "cta_text": "Start Building Collections",
+        "cta_link": "#card-builder"
+      }
+    },
+    "pokemon-card-builder": {
+      "type": "pokemon-card-builder",
+      "settings": {
+        "hero_title": "Create Custom Pokemon Card Collections",
+        "hero_description": "Build beautiful collection pages with 3x3 or 4x3 card grids. Let customers buy individual cards or complete sets.",
+        "show_instructions": true
       }
     },
     "about-ahmed": {
@@ -45,17 +53,14 @@
         "credential_3"
       ]
     },
-    "town-hall-info": {
-      "type": "town-hall-info"
-    },
     "newsletter-signup": {
       "type": "newsletter-signup"
     }
   },
   "order": [
     "pokepage-hero",
+    "pokemon-card-builder",
     "about-ahmed",
-    "town-hall-info",
     "newsletter-signup"
   ]
 }

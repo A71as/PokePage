@@ -1,0 +1,21 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-page"
+    },
+    "pokemon-grid-large": {
+      "type": "pokemon-card-grid-4x3",
+      "settings": {
+        "show_title": true,
+        "title": "Large Pokemon Collection",
+        "description": "12-card collection with individual purchases or bundle deals",
+        "show_buy_all": true,
+        "collection_price": "$129.99"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "pokemon-grid-large"
+  ]
+}

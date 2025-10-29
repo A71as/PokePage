@@ -1,0 +1,345 @@
+{% comment %}
+  Pokemon Card Collection Builder Section
+  Allows users to build custom card collection pages
+{% endcomment %}
+
+<style>
+  .card-builder-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .card-builder-hero h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+  
+  .card-builder-hero p {
+    font-size: 1.25rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+  }
+  
+  .builder-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  
+  .builder-option {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+  }
+  
+  .builder-option:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.15);
+  }
+  
+  .option-preview {
+    width: 120px;
+    height: 90px;
+    margin: 0 auto 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    display: grid;
+    gap: 2px;
+    padding: 8px;
+    background: #f9fafb;
+  }
+  
+  .preview-3x3 {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  
+  .preview-4x3 {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+  
+  .preview-card {
+    background: #3b82f6;
+    border-radius: 2px;
+  }
+  
+  .option-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .option-description {
+    color: #6b7280;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+  
+  .option-features {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .option-features li {
+    color: #10b981;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .option-features li:before {
+    content: "✓ ";
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+  
+  .create-page-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    width: 100%;
+  }
+  
+  .create-page-btn:hover {
+    transform: scale(1.05);
+  }
+  
+  .how-it-works {
+    max-width: 800px;
+    margin: 4rem auto 0;
+    padding: 0 2rem;
+  }
+  
+  .how-it-works h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 3rem;
+  }
+  
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+  }
+  
+  .step {
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .step-number {
+    width: 48px;
+    height: 48px;
+    background: #3b82f6;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0 auto 1rem;
+  }
+  
+  .step h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+  }
+  
+  .step p {
+    color: #6b7280;
+    font-size: 0.875rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    .card-builder-hero h1 {
+      font-size: 2rem;
+    }
+    
+    .builder-options {
+      grid-template-columns: 1fr;
+      padding: 0 1rem;
+    }
+  }
+</style>
+
+<div class="pokemon-card-builder">
+  <div class="card-builder-hero">
+    <h1>{{ section.settings.hero_title | default: 'Create Your Pokemon Card Collection' }}</h1>
+    <p>{{ section.settings.hero_description | default: 'Build custom card collection pages and let customers buy individual cards or complete sets' }}</p>
+  </div>
+  
+  <div class="builder-options">
+    <div class="builder-option">
+      <div class="option-preview preview-3x3">
+        {% for i in (1..9) %}
+          <div class="preview-card"></div>
+        {% endfor %}
+      </div>
+      <h3 class="option-title">3x3 Collection</h3>
+      <p class="option-description">Perfect for showcasing a curated set of 9 Pokemon cards in a clean, balanced layout.</p>
+      <ul class="option-features">
+        <li>9 card slots</li>
+        <li>Individual buy buttons</li>
+        <li>Collection bundle pricing</li>
+        <li>Mobile responsive</li>
+      </ul>
+      <button class="create-page-btn" onclick="showInstructions('3x3')">
+        Create 3x3 Collection Page
+      </button>
+    </div>
+    
+    <div class="builder-option">
+      <div class="option-preview preview-4x3">
+        {% for i in (1..12) %}
+          <div class="preview-card"></div>
+        {% endfor %}
+      </div>
+      <h3 class="option-title">4x3 Collection</h3>
+      <p class="option-description">Ideal for larger collections with 12 cards, great for themed sets or evolution chains.</p>
+      <ul class="option-features">
+        <li>12 card slots</li>
+        <li>Individual buy buttons</li>
+        <li>Collection bundle pricing</li>
+        <li>Compact mobile view</li>
+      </ul>
+      <button class="create-page-btn" onclick="showInstructions('4x3')">
+        Create 4x3 Collection Page
+      </button>
+    </div>
+  </div>
+  
+  {% if section.settings.show_instructions %}
+    <div class="how-it-works">
+      <h2>How It Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Choose Layout</h3>
+          <p>Select either a 3x3 or 4x3 grid layout based on your collection size and design preference.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Create Page</h3>
+          <p>Add a new page in your Shopify admin and insert the Pokemon card grid section.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Add Products</h3>
+          <p>Configure each card slot with your Pokemon card products from your inventory.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Set Pricing</h3>
+          <p>Individual cards show their own prices, plus set a bundle price for the complete collection.</p>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<div id="instructions-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 2rem;">
+  <div style="background: white; max-width: 600px; margin: 2rem auto; padding: 2rem; border-radius: 16px; max-height: 80vh; overflow-y: auto;">
+    <h3 id="modal-title">Create Collection Page</h3>
+    <div id="modal-content"></div>
+    <button onclick="closeInstructions()" style="background: #6b7280; color: white; border: none; padding: 8px 16px; border-radius: 6px; margin-top: 1rem;">Close</button>
+  </div>
+</div>
+
+<script>
+function showInstructions(type) {
+  const modal = document.getElementById('instructions-modal');
+  const title = document.getElementById('modal-title');
+  const content = document.getElementById('modal-content');
+  
+  title.textContent = `Create ${type} Collection Page`;
+  
+  content.innerHTML = `
+    <p><strong>To create a ${type} Pokemon card collection page:</strong></p>
+    <ol style="margin: 1rem 0; padding-left: 1.5rem;">
+      <li>Go to your Shopify Admin → Online Store → Pages</li>
+      <li>Click "Add page"</li>
+      <li>Give your page a title (e.g., "Pikachu Evolution Set")</li>
+      <li>In the page content editor, add a section</li>
+      <li>Choose "Pokemon Card Grid ${type}" from the section list</li>
+      <li>Configure each card slot with products from your inventory</li>
+      <li>Set your collection bundle price</li>
+      <li>Save and publish your page</li>
+    </ol>
+    <p><strong>Tips:</strong></p>
+    <ul style="margin: 1rem 0; padding-left: 1.5rem;">
+      <li>Create products for each individual Pokemon card first</li>
+      <li>Use high-quality card images (at least 400x600px)</li>
+      <li>Consider themed collections (evolution chains, same type, etc.)</li>
+      <li>Bundle pricing should offer savings vs. individual cards</li>
+    </ul>
+  `;
+  
+  modal.style.display = 'block';
+}
+
+function closeInstructions() {
+  document.getElementById('instructions-modal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+document.getElementById('instructions-modal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeInstructions();
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Pokemon Card Builder",
+  "settings": [
+    {
+      "type": "text",
+      "id": "hero_title",
+      "label": "Hero Title",
+      "default": "Create Your Pokemon Card Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_description",
+      "label": "Hero Description",
+      "default": "Build custom card collection pages and let customers buy individual cards or complete sets"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_instructions",
+      "label": "Show 'How It Works' section",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "Pokemon Card Builder"
+    }
+  ]
+}
+{% endschema %}
