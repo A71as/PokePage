@@ -286,8 +286,24 @@
 
 <script>
 function openPageBuilder(layout) {
+  console.log('openPageBuilder called with layout:', layout);
+  
   const modal = document.getElementById('page-builder-modal');
   const content = document.getElementById('modal-page-builder');
+  
+  if (!modal) {
+    console.error('Modal element not found!');
+    alert('Error: Modal not found. Please refresh the page and try again.');
+    return;
+  }
+  
+  if (!content) {
+    console.error('Modal content element not found!');
+    alert('Error: Modal content not found. Please refresh the page and try again.');
+    return;
+  }
+  
+  console.log('Modal elements found, showing modal...');
   
   // Show the modal
   modal.style.display = 'block';
@@ -707,7 +723,7 @@ function initModalBrowser() {
       console.log('Fetching all sets and filtering for era:', era);
       
       // Fetch all sets and filter client-side for better reliability
-      const response = await fetch(\`\${API_BASE}/sets?pageSize=250\`, {
+      const response = await fetch(\`\${API_BASE}/sets?pageSize=50\`, {
         headers: { 'X-Api-Key': API_KEY }
       });
       
@@ -717,12 +733,20 @@ function initModalBrowser() {
       
       const data = await response.json();
       console.log('Fetched', data.data?.length || 0, 'total sets');
+      console.log('API Response:', data);
       
-      // Filter sets client-side based on era characteristics
-      const sets = filterSetsByEra(data.data || [], era);
-      console.log('Filtered to', sets.length, 'sets for era:', era);
-      
-      displayModalSets(sets);
+      // Temporary: show first 10 sets for any era to test display
+      if (era === 'vintage') {
+        // Filter sets client-side based on era characteristics
+        const sets = filterSetsByEra(data.data || [], era);
+        console.log('Filtered to', sets.length, 'sets for era:', era);
+        displayModalSets(sets);
+      } else {
+        // For testing: show first 5 sets regardless of era
+        console.log('Testing: showing first 5 sets for era:', era);
+        const testSets = (data.data || []).slice(0, 5);
+        displayModalSets(testSets);
+      }
     } catch (error) {
       console.error('Error fetching sets:', error);
       setsLoading.innerHTML = \`Error loading sets: \${error.message}. Please try again.\`;
@@ -731,25 +755,30 @@ function initModalBrowser() {
   
   function filterSetsByEra(allSets, era) {
     console.log('Filtering', allSets.length, 'sets for era:', era);
+    console.log('Sample sets:', allSets.slice(0, 3));
     
     // Comprehensive era filtering based on series and set names from API data
     const eraFilters = {
       vintage: (set) => {
         const series = set.series?.toLowerCase() || '';
         const name = set.name?.toLowerCase() || '';
+        const year = set.releaseDate ? parseInt(set.releaseDate.substring(0, 4)) : 0;
         return series === 'base' || 
                name.includes('base') || 
                name.includes('jungle') || 
                name.includes('fossil') ||
-               (set.releaseDate && set.releaseDate.startsWith('1999'));
+               name.includes('rocket') ||
+               name.includes('gym') ||
+               (year >= 1998 && year <= 2000);
       },
       
       neo: (set) => {
         const series = set.series?.toLowerCase() || '';
         const name = set.name?.toLowerCase() || '';
+        const year = set.releaseDate ? parseInt(set.releaseDate.substring(0, 4)) : 0;
         return series.includes('neo') || 
                name.includes('neo') ||
-               (set.releaseDate && (set.releaseDate.startsWith('2000') || set.releaseDate.startsWith('2001')));
+               (year >= 2000 && year <= 2001);
       },
       
       ecard: (set) => {
@@ -859,8 +888,22 @@ function initModalBrowser() {
       }
     };
     
-    const filtered = allSets.filter(eraFilters[era] || (() => false));
+    const filter = eraFilters[era];
+    if (!filter) {
+      console.error('No filter found for era:', era);
+      return [];
+    }
+    
+    const filtered = allSets.filter((set, index) => {
+      const result = filter(set);
+      if (index < 5) {
+        console.log(\`Set \${index}: \${set.name} (series: \${set.series}, date: \${set.releaseDate}) -> \${result}\`);
+      }
+      return result;
+    });
+    
     console.log('Filtered to', filtered.length, 'sets for era:', era);
+    console.log('Filtered sets:', filtered.map(s => s.name));
     
     // Sort by release date (newest first) and limit results
     return filtered
