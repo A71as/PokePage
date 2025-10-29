@@ -630,19 +630,19 @@ function initModalBrowser() {
   let currentSet = null;
   let selectedSlot = null;
   
-  // Era mappings to API queries
+  // Era mappings to API queries - Simplified approach
   const eraQueries = {
-    vintage: 'set.series:"Base"',
-    neo: 'set.series:"Neo"',
-    ecard: 'set.series:"E-Card"',
-    ex: 'set.series:"EX"',
-    dp: 'set.series:"Diamond & Pearl"',
-    hgss: 'set.series:"HeartGold & SoulSilver"',
-    bw: 'set.series:"Black & White"',
-    xy: 'set.series:"XY"',
-    sm: 'set.series:"Sun & Moon"',
-    swsh: 'set.series:"Sword & Shield"',
-    sv: 'set.series:"Scarlet & Violet"'
+    vintage: 'set.releaseDate:[1998-01-01 TO 1999-12-31]',
+    neo: 'set.releaseDate:[2000-01-01 TO 2001-12-31]',
+    ecard: 'set.releaseDate:[2002-01-01 TO 2003-12-31]',
+    ex: 'set.releaseDate:[2003-01-01 TO 2007-12-31]',
+    dp: 'set.releaseDate:[2007-01-01 TO 2009-12-31]',
+    hgss: 'set.releaseDate:[2009-01-01 TO 2011-12-31]',
+    bw: 'set.releaseDate:[2011-01-01 TO 2013-12-31]',
+    xy: 'set.releaseDate:[2014-01-01 TO 2016-12-31]',
+    sm: 'set.releaseDate:[2017-01-01 TO 2019-12-31]',
+    swsh: 'set.releaseDate:[2020-01-01 TO 2022-12-31]',
+    sv: 'set.releaseDate:[2023-01-01 TO 2025-12-31]'
   };
   
   // Tab switching
@@ -704,17 +704,69 @@ function initModalBrowser() {
     setsGrid.style.display = 'none';
     
     try {
+      // First try with date range query
+      let sets = [];
       const query = eraQueries[era];
-      const response = await fetch(\`\${API_BASE}/sets?q=\${encodeURIComponent(query)}\`, {
+      console.log('Fetching sets for era:', era, 'with query:', query);
+      
+      const url = \`\${API_BASE}/sets?q=\${encodeURIComponent(query)}&pageSize=100\`;
+      console.log('API URL:', url);
+      
+      const response = await fetch(url, {
         headers: { 'X-Api-Key': API_KEY }
       });
       
+      if (!response.ok) {
+        throw new Error(\`HTTP error! status: \${response.status}\`);
+      }
+      
       const data = await response.json();
-      displayModalSets(data.data || []);
+      console.log('API response data:', data);
+      
+      sets = data.data || [];
+      
+      // If no sets found with date query, try fallback approach
+      if (sets.length === 0) {
+        console.log('No sets found with date query, trying fallback...');
+        const fallbackResponse = await fetch(\`\${API_BASE}/sets?pageSize=100\`, {
+          headers: { 'X-Api-Key': API_KEY }
+        });
+        
+        if (fallbackResponse.ok) {
+          const fallbackData = await fallbackResponse.json();
+          // Filter sets client-side based on era characteristics
+          sets = filterSetsByEra(fallbackData.data || [], era);
+        }
+      }
+      
+      displayModalSets(sets);
     } catch (error) {
       console.error('Error fetching sets:', error);
-      setsLoading.innerHTML = 'Error loading sets. Please try again.';
+      setsLoading.innerHTML = \`Error loading sets: \${error.message}. Please try again.\`;
     }
+  }
+  
+  function filterSetsByEra(allSets, era) {
+    console.log('Filtering', allSets.length, 'sets for era:', era);
+    
+    // Simple era filtering based on set names and release dates
+    const eraFilters = {
+      vintage: (set) => set.releaseDate && (set.releaseDate.startsWith('1998') || set.releaseDate.startsWith('1999')) || set.name.toLowerCase().includes('base'),
+      neo: (set) => set.name.toLowerCase().includes('neo') || (set.releaseDate && (set.releaseDate.startsWith('2000') || set.releaseDate.startsWith('2001'))),
+      ecard: (set) => set.name.toLowerCase().includes('e-card') || set.name.toLowerCase().includes('expedition') || set.name.toLowerCase().includes('aquapolis') || set.name.toLowerCase().includes('skyridge'),
+      ex: (set) => set.name.toLowerCase().includes('ex ') || set.name.toLowerCase().includes('ruby') || set.name.toLowerCase().includes('sapphire') || set.name.toLowerCase().includes('emerald'),
+      dp: (set) => set.name.toLowerCase().includes('diamond') || set.name.toLowerCase().includes('pearl') || set.name.toLowerCase().includes('platinum'),
+      hgss: (set) => set.name.toLowerCase().includes('heartgold') || set.name.toLowerCase().includes('soulsilver') || set.name.toLowerCase().includes('call of legends'),
+      bw: (set) => set.name.toLowerCase().includes('black') || set.name.toLowerCase().includes('white') || set.name.toLowerCase().includes('plasma'),
+      xy: (set) => set.name.toLowerCase().includes('xy') || set.name.toLowerCase().includes('kalos') || set.name.toLowerCase().includes('flashfire') || set.name.toLowerCase().includes('furious'),
+      sm: (set) => set.name.toLowerCase().includes('sun') || set.name.toLowerCase().includes('moon') || set.name.toLowerCase().includes('ultra') || set.name.toLowerCase().includes('guardians'),
+      swsh: (set) => set.name.toLowerCase().includes('sword') || set.name.toLowerCase().includes('shield') || set.name.toLowerCase().includes('rebel') || set.name.toLowerCase().includes('darkness'),
+      sv: (set) => set.name.toLowerCase().includes('scarlet') || set.name.toLowerCase().includes('violet') || set.name.toLowerCase().includes('paldea')
+    };
+    
+    const filtered = allSets.filter(eraFilters[era] || (() => false));
+    console.log('Filtered to', filtered.length, 'sets for era:', era);
+    return filtered.slice(0, 20); // Limit to 20 sets per era
   }
   
   function displayModalSets(sets) {
